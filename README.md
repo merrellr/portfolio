@@ -24,6 +24,29 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
 - **Resume filters:** each `<article class="role">` in `resume.html` has `data-tags`
   (`ai exec startup interop revenue payer`).
 
+## Turning on AI answers for Ask
+
+Ask always searches the site in the visitor's browser. When `ASK_ENDPOINT` at the top of `assets/js/site.js`
+is set, it also sends the question and the five best-matching sections to a small Google Apps Script
+(`apps-script/ask.gs`). That script asks Groq to write a two-to-four-sentence answer using only those sections,
+with numbered citations. If the script is unavailable or over its daily limit, Ask quietly falls back to
+search results.
+
+One-time setup:
+1. Create a new Google Sheet named **Portfolio Ask log**, then open **Extensions → Apps Script**.
+2. Replace the contents of `Code.gs` with `apps-script/ask.gs` and save.
+3. **Project Settings** (gear icon) → **Script properties** → add `GROQ_API_KEY` with your Groq key.
+4. **Deploy → New deployment** → type **Web app** → Execute as **Me**, Who has access **Anyone** → **Deploy**,
+   and approve the permissions. Copy the **Web app URL** (ends in `/exec`).
+5. Paste that URL into `ASK_ENDPOINT` in `assets/js/site.js` and push.
+
+Every question is logged to the sheet's **Questions** tab: time, question, sections used and outcome. Limits
+are 60 answers a day overall and 8 per visitor (see the top of `ask.gs`). Ask uses `openai/gpt-oss-20b`,
+a different model from the assessment's grader, so the two don't share Groq's per-model daily limits.
+
+To change the script later, paste the new version, then **Deploy → Manage deployments → pencil → Version:
+New version → Deploy**. The URL stays the same.
+
 ## Preview locally
 
 ```

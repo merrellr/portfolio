@@ -10,6 +10,9 @@
   "use strict";
 
   var EMAIL = "merrell.robert.j@gmail.com";
+  // The Google Apps Script web app that writes AI answers (apps-script/ask.gs).
+  // Leave empty and Ask still works as a plain search over the site.
+  var ASK_ENDPOINT = "";
   var PAGES = ["index.html", "work.html", "resume.html", "writing.html"];
   var PAGE_NAMES = { "index.html": "Home", "work.html": "Work", "resume.html": "Resume", "writing.html": "Writing" };
 
@@ -282,7 +285,7 @@
         if (homeSeen) return false;
         homeSeen = true; return true;
       });
-      return { results: scored.slice(0, 4).map(function (r) { return r.d; }), terms: Object.keys(terms) };
+      return { results: scored.slice(0, 5).map(function (r) { return r.d; }), terms: Object.keys(terms) };
     });
   }
 
@@ -308,21 +311,56 @@
     var box = $("#ask");
     if (!box) return;
     var form = $(".ask-form", box), input = $("input", form), out = $(".ask-out", box);
+    if (ASK_ENDPOINT) $$("[data-ai-text]").forEach(function (el) { el.textContent = el.getAttribute("data-ai-text"); });
+    var seq = 0;
     function run(q) {
       q = q.trim();
       if (!q) return;
       input.value = q;
+      var mine = ++seq;
       search(q).then(function (r) {
+        if (mine !== seq) return;
         var html = '<div class="ask-q">“' + esc(q) + '”</div>';
         if (!r.results.length) {
-          html += '<p class="muted">Nothing on the site answers that directly. <a href="mailto:' + EMAIL + '">Ask Robert by email</a>; he replies quickly.</p>';
-        } else {
-          html += r.results.map(function (d) {
-            return '<a class="ask-hit" href="' + d.url + '"><small>' + esc(d.kind) + '</small><b>' + esc(d.title) + '</b><p>' + snippet(d.text, r.terms) + '</p></a>';
-          }).join("");
+          out.innerHTML = html + '<p class="muted">Nothing on the site answers that directly. <a href="mailto:' + EMAIL + '">Ask Robert by email</a>.</p>';
+          return;
         }
+        if (ASK_ENDPOINT) html += '<div class="ask-answer" aria-busy="true"><span class="ask-ai">AI answer</span><p class="ask-thinking">Reading the sections below…</p></div>';
+        html += '<div class="ask-src-label">' + (ASK_ENDPOINT ? "Sources" : "Most relevant sections") + "</div>";
+        html += r.results.map(function (d, i) {
+          return '<a class="ask-hit" href="' + d.url + '"><small>' + (ASK_ENDPOINT ? "[" + (i + 1) + "] " : "") + esc(d.kind) + '</small><b>' + esc(d.title) + '</b><p>' + snippet(d.text, r.terms) + '</p></a>';
+        }).join("");
         out.innerHTML = html;
         out.scrollTop = 0;
+        if (ASK_ENDPOINT) aiAnswer(q, r.results, mine);
+      });
+    }
+    function aiAnswer(q, results, mine) {
+      var box2 = $(".ask-answer", out);
+      fetch(ASK_ENDPOINT, {
+        method: "POST",
+        // text/plain keeps this a "simple" request, which Apps Script accepts without a CORS preflight
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          q: q,
+          cid: visitorId(),
+          sources: results.map(function (d) { return { url: d.url, title: d.title, text: d.text.slice(0, 1600) }; })
+        })
+      }).then(function (res) { return res.json(); }).then(function (data) {
+        if (mine !== seq || !box2) return;
+        box2.removeAttribute("aria-busy");
+        if (data && data.ok && data.answer) {
+          box2.innerHTML = '<span class="ask-ai">AI answer</span>' + renderAnswer(data.answer, results) +
+            '<p class="ask-fine">Written by AI from the sections below. Check the linked sources for the detail.</p>';
+        } else {
+          box2.innerHTML = '<p class="ask-fine">' + (data && data.error === "daily_limit"
+            ? "AI answers have reached today's limit. The most relevant sections are below."
+            : "The AI answer isn't available right now. The most relevant sections are below.") + "</p>";
+        }
+      }).catch(function () {
+        if (mine !== seq || !box2) return;
+        box2.removeAttribute("aria-busy");
+        box2.innerHTML = '<p class="ask-fine">The AI answer isn\'t available right now. The most relevant sections are below.</p>';
       });
     }
     form.addEventListener("submit", function (e) { e.preventDefault(); run(input.value); });
@@ -332,6 +370,29 @@
     if (q) { run(q); }
     box._run = run;
   }
+  /* Citations like [2] or [1, 3] become links to the matching source. */
+  function renderAnswer(text, results) {
+    return esc(text).split(/\n{2,}/).map(function (para) {
+      para = para.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, function (m, nums) {
+        return nums.split(/\s*,\s*/).map(function (n) {
+          var d = results[+n - 1];
+          return d ? '<a class="cite" href="' + d.url + '" title="' + esc(d.title) + '">' + n + "</a>" : "";
+        }).join("");
+      });
+      return "<p>" + para.replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+
+  /* An anonymous id so the backend can apply a per-visitor daily limit. */
+  function visitorId() {
+    var id = store("ask_vid");
+    if (!id) {
+      id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      store("ask_vid", id);
+    }
+    return id || "";
+  }
+
   function goAsk(q) {
     var box = $("#ask");
     if (box) {
