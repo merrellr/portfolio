@@ -3,7 +3,10 @@
  *
  * 1. "Ask": AI answers about Robert's experience (below).
  * 2. Contact form: saves each message to the "Messages" tab and emails it to
- *    the script owner, with Reply-To set to the sender (see answerContact_).
+ *    NOTIFY_EMAIL_, with Reply-To set to the sender (see answerContact_).
+ *    After pasting a new version, run testContactEmail once from the editor
+ *    (select it in the function menu, click Run) so Google asks for
+ *    permission to send email, then deploy a new version.
  *
  * The site's search runs in the visitor's browser, finds the most relevant
  * sections of the portfolio, and POSTs them here with the question. This
@@ -178,6 +181,8 @@ function logQuestion_(q, sources, outcome) {
 
 /* ================= Contact form ================= */
 
+// Where contact-form messages are delivered.
+var NOTIFY_EMAIL_ = "merrell.robert.j@gmail.com";
 var CONTACT_DAILY_LIMIT_ = 25;
 var CONTACT_REASONS_ = {
   hiring: "Hiring for a role",
@@ -204,15 +209,7 @@ function answerContact_(body) {
 
   if (!takeContactQuota_()) return { ok: false, error: "daily_limit" };
 
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    if (ss) {
-      var sheet = ss.getSheetByName("Messages") || ss.insertSheet("Messages");
-      if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Reason", "Name", "Email", "Company", "Rating", "Message"]);
-      sheet.appendRow([new Date(), CONTACT_REASONS_[reason], name, email, company, rating, message]);
-    }
-  } catch (err) { /* still try the email */ }
-
+  var emailed = "yes";
   try {
     var lines = [
       "Reason: " + CONTACT_REASONS_[reason],
@@ -225,13 +222,34 @@ function answerContact_(body) {
       "",
       "Sent from the contact form on portfolio.productadvisory.co"
     ].filter(function (l) { return l !== null; });
-    var opts = { to: Session.getEffectiveUser().getEmail(), subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
+    var opts = { to: NOTIFY_EMAIL_, subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
     if (email) opts.replyTo = email;
     MailApp.sendEmail(opts);
   } catch (err) {
-    return { ok: true, emailed: false };
+    emailed = "failed: " + String(err && err.message || err).slice(0, 200);
   }
-  return { ok: true };
+
+  // The sheet keeps every message even if the email fails, with the reason in the last column.
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) {
+      var sheet = ss.getSheetByName("Messages") || ss.insertSheet("Messages");
+      if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Reason", "Name", "Email", "Company", "Rating", "Message", "Emailed"]);
+      sheet.appendRow([new Date(), CONTACT_REASONS_[reason], name, email, company, rating, message, emailed]);
+    }
+  } catch (err) { /* the email may still have gone */ }
+
+  return emailed === "yes" ? { ok: true } : { ok: true, emailed: false };
+}
+
+/**
+ * Run this once from the Apps Script editor after pasting a new version.
+ * It makes Google ask for permission to send email, then sends a test to
+ * NOTIFY_EMAIL_. Check that inbox (and spam) before deploying.
+ */
+function testContactEmail() {
+  MailApp.sendEmail(NOTIFY_EMAIL_, "Portfolio contact form: test", "If you can read this, the contact form can email you.\n\nRemaining email quota today: " + MailApp.getRemainingDailyQuota());
+  Logger.log("Test email sent to " + NOTIFY_EMAIL_);
 }
 
 function takeContactQuota_() {
