@@ -34,5 +34,9 @@ Then open http://localhost:8000. Ask needs to run over http so it can read the o
 
 ## Deploy
 
-GitHub Pages: Settings → Pages → Deploy from a branch → `main` / root. The `CNAME` file sets the custom domain.
-At the DNS provider for `productadvisory.co`, point a `CNAME` record for `portfolio` to `merrellr.github.io`.
+GitHub Pages: Settings → Pages → Deploy from a branch → `main` / root. Preview at https://merrellr.github.io/portfolio/.
+
+To go live on the custom domain:
+1. At the DNS provider for `productadvisory.co`, change the `portfolio` record to a `CNAME` pointing to `merrellr.github.io`.
+2. In Settings → Pages → Custom domain, enter `portfolio.productadvisory.co` and save. GitHub commits a `CNAME` file.
+3. Once the certificate is issued, tick **Enforce HTTPS**.
