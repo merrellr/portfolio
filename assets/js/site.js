@@ -1,0 +1,441 @@
+/* ================================================================
+   Robert Merrell — portfolio behaviour (no dependencies)
+   - theme toggle, sticky nav, mobile menu, reveal-on-scroll
+   - animated counters and bars
+   - filter chips (Work and Resume pages)
+   - "Ask" search over every page's [data-ask] blocks
+   - ⌘K / Ctrl+K command palette
+   ================================================================ */
+(function () {
+  "use strict";
+
+  var EMAIL = "merrell.robert.j@gmail.com";
+  var PAGES = ["index.html", "work.html", "resume.html", "writing.html"];
+  var PAGE_NAMES = { "index.html": "Home", "work.html": "Work", "resume.html": "Resume", "writing.html": "Writing" };
+
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  function store(key, val) {
+    try {
+      if (val === undefined) return localStorage.getItem(key);
+      if (val === null) localStorage.removeItem(key); else localStorage.setItem(key, val);
+    } catch (e) { return null; }
+  }
+
+  function currentPage() {
+    var p = location.pathname.split("/").pop();
+    return p && p.indexOf(".html") > -1 ? p : "index.html";
+  }
+
+  /* ---------- toast ---------- */
+  var toastEl;
+  function toast(msg) {
+    if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "toast"; toastEl.setAttribute("role", "status"); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+  }
+
+  function copyEmail() {
+    var done = function () { toast("Email copied: " + EMAIL); };
+    if (navigator.clipboard) navigator.clipboard.writeText(EMAIL).then(done, function () { location.href = "mailto:" + EMAIL; });
+    else location.href = "mailto:" + EMAIL;
+  }
+
+  /* ---------- theme ---------- */
+  var saved = store("theme");
+  if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
+  function isDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function toggleTheme() {
+    var next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    store("theme", next);
+  }
+
+  /* ---------- nav ---------- */
+  function initNav() {
+    var nav = $(".nav");
+    if (!nav) return;
+    var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 8); };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    var menu = $(".menu-btn");
+    if (menu) menu.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      menu.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    $$("[data-action]").forEach(function (b) {
+      b.addEventListener("click", function (e) {
+        var a = b.getAttribute("data-action");
+        if (a === "theme") toggleTheme();
+        if (a === "palette") openPalette();
+        if (a === "copy-email") { e.preventDefault(); copyEmail(); }
+        if (a === "ask") { e.preventDefault(); goAsk(""); }
+      });
+    });
+    var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    $$(".mod-key").forEach(function (k) { k.textContent = mac ? "⌘" : "Ctrl"; });
+  }
+
+  /* ---------- reveal, counters, bars ---------- */
+  function animateCount(el) {
+    var target = parseFloat(el.getAttribute("data-count"));
+    var pre = el.getAttribute("data-prefix") || "";
+    var suf = el.getAttribute("data-suffix") || "";
+    var start = null, dur = 1400;
+    function step(ts) {
+      if (!start) start = ts;
+      var k = Math.min(1, (ts - start) / dur);
+      var eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = pre + Math.round(target * eased) + suf;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function initReveal() {
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var targets = $$(".reveal, [data-count], .bar .fill");
+    if (!("IntersectionObserver" in window) || reduce) {
+      targets.forEach(function (el) {
+        el.classList.add("in");
+        if (el.classList.contains("fill")) el.style.width = el.getAttribute("data-w");
+      });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        el.classList.add("in");
+        if (el.hasAttribute("data-count")) animateCount(el);
+        if (el.classList.contains("fill")) el.style.width = el.getAttribute("data-w");
+        io.unobserve(el);
+      });
+    }, { threshold: 0.15 });
+    targets.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- filter chips ----------
+     <div class="chips" data-filter-for="#list" data-mode="hide|dim">
+       <button class="chip" data-filter="all">All</button> …
+     items inside #list carry data-tags="ai data …" */
+  function initFilters() {
+    $$(".chips[data-filter-for]").forEach(function (bar) {
+      var list = $(bar.getAttribute("data-filter-for"));
+      if (!list) return;
+      var mode = bar.getAttribute("data-mode") || "hide";
+      var items = $$("[data-tags]", list);
+      var chips = $$(".chip", bar);
+      chips.forEach(function (c) {
+        var f = c.getAttribute("data-filter");
+        var n = f === "all" ? items.length : items.filter(function (i) { return (" " + i.getAttribute("data-tags") + " ").indexOf(" " + f + " ") > -1; }).length;
+        var badge = document.createElement("span"); badge.className = "n"; badge.textContent = n; c.appendChild(badge);
+        c.addEventListener("click", function () { apply(f); });
+      });
+      function apply(f) {
+        chips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-filter") === f ? "true" : "false"); });
+        items.forEach(function (i) {
+          var hit = f === "all" || (" " + i.getAttribute("data-tags") + " ").indexOf(" " + f + " ") > -1;
+          if (mode === "dim") i.classList.toggle("dim", !hit); else i.hidden = !hit;
+        });
+        $$("[data-group]", list).forEach(function (g) {
+          g.hidden = mode === "hide" && !$$("[data-tags]", g).some(function (i) { return !i.hidden; });
+        });
+      }
+      var q = new URLSearchParams(location.search).get("filter");
+      apply(q && chips.some(function (c) { return c.getAttribute("data-filter") === q; }) ? q : "all");
+    });
+  }
+
+  /* open a case study when its anchor is the URL hash */
+  function openHash() {
+    if (!location.hash) return;
+    var el = document.getElementById(location.hash.slice(1));
+    if (el && el.tagName === "DETAILS") { el.open = true; el.hidden = false; }
+  }
+
+  /* ================================================================
+     Ask: a small search engine over every block marked [data-ask].
+     Each page is fetched once, split into blocks, and ranked with a
+     BM25-style score plus a few product/healthcare synonyms. Answers
+     link back to the exact block. No server and nothing leaves the
+     browser.
+     ================================================================ */
+  var STOP = "a an and are as at be been but by can could did do does for from had has have he her his how i if in into is it its me my of on or our she so than that the their them then there these they this to was we were what when where which who why will with would you your about any ever robert robert's merrell he's tell show give".split(" ");
+  var STOPSET = {}; STOP.forEach(function (w) { STOPSET[w] = 1; });
+  var SYN = {
+    ai: ["ml", "llm", "llms", "nlp", "machine", "learning", "model", "models", "predictive", "copilot", "agentic", "claude"],
+    ml: ["ai", "machine", "learning", "model", "predictive"],
+    llm: ["ai", "llms", "language", "models"],
+    revenue: ["$", "revenue", "growth", "commercial", "reimbursement", "billing"],
+    money: ["revenue", "$"],
+    team: ["teams", "organization", "org", "hiring", "built", "leadership", "led"],
+    lead: ["led", "leadership", "head", "executive", "team"],
+    leadership: ["led", "head", "executive", "team", "board"],
+    startup: ["startup", "founder", "ground", "vynca", "incubated"],
+    interoperability: ["fhir", "hl7", "epic", "emr", "integrations", "integration"],
+    integration: ["fhir", "hl7", "epic", "emr", "integrations", "interoperability"],
+    emr: ["ehr", "epic", "cerner", "athena", "fhir", "hl7"],
+    ehr: ["emr", "epic", "cerner"],
+    epic: ["emr", "aura", "integrations"],
+    compliance: ["hipaa", "soc", "hitrust", "iso", "regulatory", "governance"],
+    security: ["hipaa", "soc", "hitrust", "iso"],
+    data: ["analytics", "warehouse", "reporting", "bi", "governance", "dashboards"],
+    analytics: ["data", "reporting", "dashboards", "bi"],
+    patient: ["patients", "engagement", "consumer", "care"],
+    payer: ["payor", "payers", "payors", "health plans", "aetna", "reimbursement"],
+    payor: ["payer", "payers", "reimbursement"],
+    cpo: ["chief", "head", "executive", "vp"],
+    gtm: ["go-to-market", "launch", "commercialization", "sales"],
+    launch: ["launched", "go-to-market", "gtm"],
+    education: ["degree", "masters", "university", "certified", "certification"],
+    built: ["build", "building", "built", "developed", "launched", "designed"],
+    product: ["products", "portfolio", "platform"]
+  };
+  function tokens(s) {
+    return (s.toLowerCase().replace(/[’']/g, "").match(/\$|[a-z0-9][a-z0-9+\-.]*[a-z0-9]|[a-z0-9]/g) || [])
+      .filter(function (t) { return !STOPSET[t]; });
+  }
+  function stem(t) { return t.length > 4 ? t.replace(/(ing|ed|es|s)$/, "") : t; }
+
+  var TAG_WORDS = { ai: "ai ai ml", data: "data analytics", interop: "interoperability emr integration", patient: "patient experience",
+    revenue: "revenue growth", built: "built", exec: "executive leadership", startup: "startup", payer: "payer reimbursement" };
+  function tagWords(el) {
+    return (el.getAttribute("data-tags") || "").split(/\s+/).map(function (t) { return TAG_WORDS[t] || ""; }).join(" ");
+  }
+  var KIND_WEIGHT = { "Case study": 1.3, "Experience": 1.15, "Resume": 0.9, "Writing": 0.9, "Home": 0.75 };
+
+  var index = null, indexing = null;
+  function chunksFrom(doc, page) {
+    return $$("[data-ask]", doc).map(function (el) {
+      var anchor = el.id ? el : el.closest("[id]");
+      var title = el.getAttribute("data-ask") || ((el.querySelector("h1,h2,h3,h4") || {}).textContent || PAGE_NAMES[page]);
+      // textContent, not innerText: closed <details> bodies must be searchable too
+      var text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      return {
+        title: title.trim(),
+        kind: el.getAttribute("data-kind") || PAGE_NAMES[page],
+        url: page + (anchor && anchor.id ? "#" + anchor.id : ""),
+        text: text,
+        toks: tokens(title + " " + title + " " + tagWords(el) + " " + text).map(stem)
+      };
+    });
+  }
+  function buildIndex() {
+    if (index) return Promise.resolve(index);
+    if (indexing) return indexing;
+    var here = currentPage();
+    var jobs = PAGES.map(function (p) {
+      if (p === here) return Promise.resolve(chunksFrom(document, p));
+      return fetch(p).then(function (r) { return r.ok ? r.text() : ""; }).then(function (html) {
+        if (!html) return [];
+        return chunksFrom(new DOMParser().parseFromString(html, "text/html"), p);
+      }).catch(function () { return []; });
+    });
+    indexing = Promise.all(jobs).then(function (lists) {
+      var docs = [].concat.apply([], lists);
+      var df = {};
+      docs.forEach(function (d) {
+        var seen = {};
+        d.tf = {};
+        d.toks.forEach(function (t) { d.tf[t] = (d.tf[t] || 0) + 1; if (!seen[t]) { seen[t] = 1; df[t] = (df[t] || 0) + 1; } });
+        d.len = d.toks.length;
+      });
+      var avg = docs.reduce(function (s, d) { return s + d.len; }, 0) / Math.max(1, docs.length);
+      index = { docs: docs, df: df, avg: avg, n: docs.length };
+      return index;
+    });
+    return indexing;
+  }
+
+  function search(q) {
+    return buildIndex().then(function (ix) {
+      var base = tokens(q);
+      var terms = {};
+      base.forEach(function (t) {
+        terms[stem(t)] = 1;
+        (SYN[t] || []).forEach(function (s) { tokens(s).forEach(function (x) { if (!terms[stem(x)]) terms[stem(x)] = 0.45; }); });
+      });
+      var k1 = 1.4, b = 0.7;
+      var scored = ix.docs.map(function (d) {
+        var s = 0, hits = 0;
+        Object.keys(terms).forEach(function (t) {
+          var f = d.tf[t];
+          if (!f) return;
+          var idf = Math.log(1 + (ix.n - ix.df[t] + 0.5) / (ix.df[t] + 0.5));
+          s += terms[t] * idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * d.len / ix.avg));
+          if (terms[t] === 1) hits++;
+        });
+        return { d: d, s: s * (1 + 0.35 * hits) * (KIND_WEIGHT[d.kind] || 1) };
+      }).filter(function (r) { return r.s > 0.6; });
+      scored.sort(function (a, c) { return c.s - a.s; });
+      // at most one summary block from the home page, so the answers point at the detail
+      var homeSeen = false;
+      scored = scored.filter(function (r) {
+        if (r.d.kind !== "Home") return true;
+        if (homeSeen) return false;
+        homeSeen = true; return true;
+      });
+      return { results: scored.slice(0, 4).map(function (r) { return r.d; }), terms: Object.keys(terms) };
+    });
+  }
+
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function snippet(text, terms) {
+    var sentences = text.split(/(?<=[.!?])\s+/);
+    var best = sentences[0] || "", bestScore = -1;
+    sentences.forEach(function (s) {
+      var toks = tokens(s).map(stem), sc = 0;
+      terms.forEach(function (t) { if (toks.indexOf(t) > -1) sc++; });
+      if (/\$|\d+%/.test(s)) sc += 0.5;
+      if (sc > bestScore) { bestScore = sc; best = s; }
+    });
+    if (best.length > 260) best = best.slice(0, 257) + "…";
+    var out = esc(best);
+    terms.filter(function (t) { return t.length > 2 && t !== "$"; }).forEach(function (t) {
+      out = out.replace(new RegExp("\\b(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[a-z]*)", "gi"), "<mark>$1</mark>");
+    });
+    return out;
+  }
+
+  function initAsk() {
+    var box = $("#ask");
+    if (!box) return;
+    var form = $(".ask-form", box), input = $("input", form), out = $(".ask-out", box);
+    function run(q) {
+      q = q.trim();
+      if (!q) return;
+      input.value = q;
+      search(q).then(function (r) {
+        var html = '<div class="ask-q">“' + esc(q) + '”</div>';
+        if (!r.results.length) {
+          html += '<p class="muted">Nothing on the site answers that directly. <a href="mailto:' + EMAIL + '">Ask Robert by email</a>; he replies quickly.</p>';
+        } else {
+          html += r.results.map(function (d) {
+            return '<a class="ask-hit" href="' + d.url + '"><small>' + esc(d.kind) + '</small><b>' + esc(d.title) + '</b><p>' + snippet(d.text, r.terms) + '</p></a>';
+          }).join("");
+        }
+        out.innerHTML = html;
+        out.scrollTop = 0;
+      });
+    }
+    form.addEventListener("submit", function (e) { e.preventDefault(); run(input.value); });
+    $$(".ask-suggest button", box).forEach(function (b) { b.addEventListener("click", function () { run(b.textContent); }); });
+    input.addEventListener("focus", function () { buildIndex(); }, { once: true });
+    var q = new URLSearchParams(location.search).get("ask");
+    if (q) { run(q); }
+    box._run = run;
+  }
+  function goAsk(q) {
+    var box = $("#ask");
+    if (box) {
+      box.scrollIntoView({ behavior: "smooth", block: "center" });
+      var input = $("input", box);
+      setTimeout(function () { input.focus(); }, 300);
+      if (q && box._run) box._run(q);
+    } else {
+      location.href = "index.html?ask=" + encodeURIComponent(q || "") + "#ask";
+    }
+  }
+
+  /* ================================================================
+     Command palette
+     ================================================================ */
+  var pal, palInput, palList, palItems = [], palSel = 0, lastFocus;
+  var ACTIONS = [
+    { g: "Go to", t: "Home", i: "⌂", run: function () { location.href = "index.html"; } },
+    { g: "Go to", t: "Work: case studies", i: "◆", run: function () { location.href = "work.html"; } },
+    { g: "Go to", t: "Resume", i: "≡", run: function () { location.href = "resume.html"; } },
+    { g: "Go to", t: "Writing & frameworks", i: "✎", run: function () { location.href = "writing.html"; } },
+    { g: "Do", t: "Copy email address", i: "@", hint: EMAIL, run: copyEmail },
+    { g: "Do", t: "Download resume (PDF)", i: "↓", run: function () { location.href = "assets/Robert-Merrell-Resume.pdf"; } },
+    { g: "Do", t: "Try the PM + AI skill assessment", i: "↗", hint: "assessment.productadvisory.co", run: function () { window.open("https://assessment.productadvisory.co/", "_blank", "noopener"); } },
+    { g: "Do", t: "Open LinkedIn", i: "in", run: function () { window.open("https://www.linkedin.com/in/robertmerrell/", "_blank", "noopener"); } },
+    { g: "Do", t: "Subscribe to the Product+ newsletter", i: "+", run: function () { window.open("https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7391081463410196482", "_blank", "noopener"); } },
+    { g: "Do", t: "Toggle light / dark", i: "◐", run: toggleTheme }
+  ];
+  function buildPalette() {
+    pal = document.createElement("div");
+    pal.className = "palette-backdrop";
+    pal.innerHTML = '<div class="palette" role="dialog" aria-modal="true" aria-label="Command menu">' +
+      '<input type="text" placeholder="Jump to a page, a case study, or ask a question…" aria-label="Search commands" autocomplete="off">' +
+      '<ul role="listbox"></ul>' +
+      '<div class="foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div></div>';
+    document.body.appendChild(pal);
+    palInput = $("input", pal); palList = $("ul", pal);
+    pal.addEventListener("click", function (e) { if (e.target === pal) closePalette(); });
+    palInput.addEventListener("input", renderPalette);
+    palInput.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); palSel = Math.min(palItems.length - 1, palSel + 1); markSel(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); palSel = Math.max(0, palSel - 1); markSel(); }
+      else if (e.key === "Enter") { e.preventDefault(); if (palItems[palSel]) { var it = palItems[palSel]; closePalette(); it.run(); } }
+      else if (e.key === "Escape") { closePalette(); }
+      else if (e.key === "Tab") { e.preventDefault(); }
+    });
+  }
+  function caseItems() {
+    if (!index) return [];
+    return index.docs.filter(function (d) { return d.kind !== "Home" && /#/.test(d.url) && (d.kind === "Case study" || d.kind === "Experience"); })
+      .map(function (d) { return { g: d.kind === "Experience" ? "Experience" : "Case studies", t: d.title, s: d.text.slice(0, 200), i: d.kind === "Experience" ? "▸" : "◆", run: function () { location.href = d.url; if (currentPage() === d.url.split("#")[0]) { location.hash = ""; location.hash = d.url.split("#")[1]; openHash(); } } }; });
+  }
+  function renderPalette() {
+    var q = palInput.value.trim().toLowerCase();
+    var all = ACTIONS.concat(caseItems());
+    palItems = all.filter(function (a) { return !q || (a.t + " " + (a.hint || "") + " " + a.g + " " + (a.s || "")).toLowerCase().indexOf(q) > -1; });
+    if (q) palItems.push({ g: "Ask", t: "Ask: “" + palInput.value.trim() + "”", i: "?", run: function () { goAsk(palInput.value.trim()); }, q: true });
+    palSel = 0;
+    var html = "", grp = "";
+    palItems.forEach(function (a, n) {
+      if (a.g !== grp) { grp = a.g; html += '<li class="grp" role="presentation">' + esc(grp) + "</li>"; }
+      html += '<li><button type="button" role="option" data-n="' + n + '"><span class="ico">' + esc(a.i) + "</span>" + esc(a.t) + (a.hint ? "<small>" + esc(a.hint) + "</small>" : "") + "</button></li>";
+    });
+    palList.innerHTML = html;
+    $$("button", palList).forEach(function (b) {
+      b.addEventListener("click", function () { var it = palItems[+b.getAttribute("data-n")]; closePalette(); it.run(); });
+      b.addEventListener("mousemove", function () { palSel = +b.getAttribute("data-n"); markSel(); });
+    });
+    markSel();
+  }
+  function markSel() {
+    $$("button", palList).forEach(function (b) {
+      var on = +b.getAttribute("data-n") === palSel;
+      b.setAttribute("aria-selected", on ? "true" : "false");
+      if (on) b.scrollIntoView({ block: "nearest" });
+    });
+  }
+  function openPalette() {
+    if (!pal) buildPalette();
+    lastFocus = document.activeElement;
+    pal.classList.add("open");
+    palInput.value = "";
+    renderPalette();
+    palInput.focus();
+    buildIndex().then(function () { if (pal.classList.contains("open")) renderPalette(); });
+  }
+  function closePalette() {
+    if (!pal) return;
+    pal.classList.remove("open");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); if (pal && pal.classList.contains("open")) closePalette(); else openPalette(); }
+    else if (e.key === "/" && !/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || "") && !(pal && pal.classList.contains("open"))) { e.preventDefault(); openPalette(); }
+  });
+
+  /* ---------- go ---------- */
+  document.addEventListener("DOMContentLoaded", function () {
+    initNav();
+    initFilters();
+    openHash();
+    initReveal();
+    initAsk();
+    var y = $("#year"); if (y) y.textContent = new Date().getFullYear();
+  });
+  window.addEventListener("hashchange", openHash);
+})();

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found · Robert Merrell</title>
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+<script>
+  // Old Google Sites paths (/home, /resume, /portfolio, /blog) → new pages
+  (function () {
+    var map = { "/home": "/", "/resume": "/resume.html", "/portfolio": "/work.html", "/blog": "/writing.html" };
+    var p = location.pathname.replace(/\/+$/, "");
+    if (map[p]) location.replace(map[p]);
+  })();
+</script>
+</head>
+<body>
+<main class="wrap page-head">
+  <div class="eyebrow">404</div>
+  <h1>That page moved.</h1>
+  <p>The site has a new home. Try the <a href="/">home page</a>, <a href="/work.html">work</a> or <a href="/resume.html">resume</a>.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# portfolio
+
+Robert Merrell's portfolio, served at **https://portfolio.productadvisory.co** with GitHub Pages.
+
+Plain HTML, CSS and JavaScript, with no build step and no dependencies. To change the content, edit the page.
+
+| Page | File |
+| --- | --- |
+| Home | `index.html` |
+| Work (case studies) | `work.html` |
+| Resume | `resume.html` (+ `assets/Robert-Merrell-Resume.pdf`) |
+| Writing & frameworks | `writing.html` |
+| Old Google Sites links (`/home`, `/resume`, `/portfolio`, `/blog`) | `404.html` redirects them |
+
+## How things work
+
+- **Styles:** `assets/css/site.css`. Colours are tokens at the top of the file, and dark mode redefines them.
+- **Behaviour:** `assets/js/site.js`, which handles the theme toggle, mobile menu, counters, filter chips, the
+  **Ask** search and the **⌘K command menu**.
+- **Ask / ⌘K content:** any element with a `data-ask="Title"` attribute is searchable, on any page.
+  `data-kind="Case study"` or `data-kind="Experience"` also lists it in the command menu. To add a case study,
+  copy a `<details class="card case">` block in `work.html`, give it a unique `id`, and set its
+  `data-tags` (`ai data interop patient revenue built`) so the filter chips pick it up.
+- **Resume filters:** each `<article class="role">` in `resume.html` has `data-tags`
+  (`ai exec startup interop revenue payer`).
+
+## Preview locally
+
+```
+python3 -m http.server 8000
+```
+
+Then open http://localhost:8000. Ask needs to run over http so it can read the other pages.
+
+## Deploy
+
+GitHub Pages: Settings → Pages → Deploy from a branch → `main` / root. The `CNAME` file sets the custom domain.
+At the DNS provider for `productadvisory.co`, point a `CNAME` record for `portfolio` to `merrellr.github.io`.
