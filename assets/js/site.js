@@ -682,7 +682,7 @@
           if (!res || !res.ok) throw new Error((res && res.error) || "failed");
           track("contact_submit", { reason: d.reason });
           form.innerHTML = '<div class="sent"><h3>Thanks' + (d.name ? ", " + esc(d.name.split(" ")[0]) : "") + '.</h3><p>' +
-            (d.reason === "feedback" ? "Your feedback is on its way to me. It helps make this site better." : "Your message is on its way to my inbox, and I'll reply to " + esc(d.email) + ".") +
+            (d.reason === "feedback" ? "Your feedback is on its way to me. It helps make this site better." : "Your message is on its way to my inbox, and I'll reply to " + esc(d.email) + ". You'll also get a short confirmation by email.") +
             '</p><a class="btn ghost" href="index.html">Back to the home page</a></div>';
         })
         .catch(function () {

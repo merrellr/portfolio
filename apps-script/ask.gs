@@ -2,8 +2,9 @@
  * Portfolio backend: a Google Apps Script web app with two jobs.
  *
  * 1. "Ask": AI answers about Robert's experience (below).
- * 2. Contact form: saves each message to the "Messages" tab and emails it to
- *    NOTIFY_EMAIL_, with Reply-To set to the sender (see answerContact_).
+ * 2. Contact form: saves each message to the "Messages" tab, emails it to
+ *    NOTIFY_EMAIL_ with Reply-To set to the sender, and sends the sender a
+ *    short thank-you (see answerContact_ and sendThanks_).
  *    After pasting a new version, run testContactEmail once from the editor
  *    (select it in the function menu, click Run) so Google asks for
  *    permission to send email, then deploy a new version.
@@ -229,6 +230,8 @@ function answerContact_(body) {
     emailed = "failed: " + String(err && err.message || err).slice(0, 200);
   }
 
+  if (email) emailed += "; " + sendThanks_(email, name, reason);
+
   // The sheet keeps every message even if the email fails, with the reason in the last column.
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -239,7 +242,46 @@ function answerContact_(body) {
     }
   } catch (err) { /* the email may still have gone */ }
 
-  return emailed === "yes" ? { ok: true } : { ok: true, emailed: false };
+  return emailed.indexOf("yes") === 0 ? { ok: true } : { ok: true, emailed: false };
+}
+
+/**
+ * The automatic thank-you. Its wording is fixed and never repeats what the
+ * visitor typed (apart from a cleaned-up first name), and each address gets
+ * at most one a day, so the form can't be used to send email to strangers.
+ * Replies go to NOTIFY_EMAIL_.
+ */
+function sendThanks_(email, name, reason) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+    var key = "thanks_" + today + "_" + Utilities.base64EncodeWebSafe(email.toLowerCase()).slice(0, 80);
+    if (props.getProperty(key)) return "thank-you already sent today";
+    props.getKeys().forEach(function (k) {
+      if (k.indexOf("thanks_") === 0 && k.indexOf("thanks_" + today) !== 0) props.deleteProperty(k);
+    });
+
+    var first = (name.split(" ")[0] || "").replace(/[^A-Za-zÀ-ÿ'-]/g, "").slice(0, 30);
+    var hello = first ? "Hi " + first + "," : "Hi,";
+    var line = reason === "feedback"
+      ? "Thanks for the feedback on my portfolio. I read every note, and it helps me make the site better."
+      : "Thanks for your note through my portfolio. I've received it and will follow up with you soon.";
+    var site = "https://portfolio.productadvisory.co";
+    var linkedin = "https://www.linkedin.com/in/robertmerrell/";
+    var text = [hello, "", line, "",
+      "In the meantime, you're welcome to look through my case studies at " + site + " or connect with me on LinkedIn: " + linkedin,
+      "", "Best,", "Robert Merrell", "portfolio.productadvisory.co"].join("\n");
+    var html = "<p>" + hello + "</p><p>" + line + "</p>" +
+      "<p>In the meantime, you're welcome to look through my <a href=\"" + site + "/work.html\">case studies</a> or " +
+      "<a href=\"" + linkedin + "\">connect with me on LinkedIn</a>.</p>" +
+      "<p>Best,<br>Robert Merrell<br><a href=\"" + site + "\">portfolio.productadvisory.co</a></p>";
+
+    MailApp.sendEmail({ to: email, subject: "Thanks for reaching out", body: text, htmlBody: html, name: "Robert Merrell", replyTo: NOTIFY_EMAIL_ });
+    props.setProperty(key, "1");
+    return "thank-you sent";
+  } catch (err) {
+    return "thank-you failed: " + String(err && err.message || err).slice(0, 120);
+  }
 }
 
 /**
