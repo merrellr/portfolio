@@ -10,6 +10,8 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
 | Work (case studies) | `work.html` |
 | Resume | `resume.html` (+ `assets/Robert-Merrell-Resume.pdf`) |
 | Writing & frameworks | `writing.html` |
+| Contact form | `contact.html` (posts to the same Apps Script as Ask) |
+| Make it yours (preferences) | `preferences.html` |
 | Old Google Sites links (`/home`, `/resume`, `/portfolio`, `/blog`) | `404.html` redirects them |
 
 ## How things work
@@ -23,6 +25,21 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
   `data-tags` (`ai data interop patient revenue built`) so the filter chips pick it up.
 - **Resume filters:** each `<article class="role">` in `resume.html` has `data-tags`
   (`ai exec startup interop revenue payer`).
+
+## Make it yours (preferences)
+
+`assets/js/prefs.js` runs in the `<head>` of every page, before anything is drawn. It reads the visitor's choices
+from local storage and sets attributes on `<html>`: `data-style` (editorial, boardroom or lab), `data-accent`,
+`data-text`, `data-density`, `data-motion` and `data-lens`. `site.css` does the rest with custom properties, with
+light and dark versions of each style and accent. The "Who's visiting?" lens shows a matching "Start here" card on
+the home page. New pages must include `<script src="assets/js/prefs.js"></script>` right after the stylesheet.
+
+## Contact form
+
+`contact.html` posts `{type: "contact", …}` to the same Apps Script web app as Ask (`ASK_ENDPOINT`). The script
+saves the message to the **Messages** tab and emails it to the account that owns the script, with Reply-To set to
+the sender. Spam protection: a hidden honeypot field, a three-second minimum before sending, and 25 messages a day.
+If the script can't be reached, the form offers a pre-filled email instead.
 
 ## Analytics and sharing
 
@@ -43,7 +60,7 @@ with numbered citations. If the script is unavailable or over its daily limit, A
 search results.
 
 One-time setup:
-1. Create a new Google Sheet named **Portfolio Ask log**, then open **Extensions → Apps Script**.
+1. Create a new Google Sheet named **Portfolio Ask log** (it also stores contact-form messages), then open **Extensions → Apps Script**.
 2. Replace the contents of `Code.gs` with `apps-script/ask.gs` and save.
 3. **Project Settings** (gear icon) → **Script properties** → add `GROQ_API_KEY` with your Groq key.
 4. **Deploy → New deployment** → type **Web app** → Execute as **Me**, Who has access **Anyone** → **Deploy**,

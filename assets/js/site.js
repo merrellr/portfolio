@@ -110,7 +110,8 @@
     requestAnimationFrame(step);
   }
   function initReveal() {
-    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var reduce = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ||
+      document.documentElement.getAttribute("data-motion") === "reduced";
     var targets = $$(".reveal, [data-count], .bar .fill");
     if (!("IntersectionObserver" in window) || reduce) {
       targets.forEach(function (el) {
@@ -441,7 +442,12 @@
     { g: "Do", t: "Try the PM + AI skill assessment", i: "↗", hint: "assessment.productadvisory.co", run: function () { window.open("https://assessment.productadvisory.co/", "_blank", "noopener"); } },
     { g: "Do", t: "Open LinkedIn", i: "in", run: function () { window.open("https://www.linkedin.com/in/robertmerrell/", "_blank", "noopener"); } },
     { g: "Do", t: "Subscribe to the Product+ newsletter", i: "+", run: function () { window.open("https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7391081463410196482", "_blank", "noopener"); } },
-    { g: "Do", t: "Toggle light / dark", i: "◐", run: toggleTheme }
+    { g: "Do", t: "Toggle light / dark", i: "◐", run: toggleTheme },
+    { g: "Do", t: "Send Robert a message", i: "✉", run: function () { location.href = "contact.html"; } },
+    { g: "Make it yours", t: "Open all preferences", i: "⚙", run: function () { location.href = "preferences.html"; } },
+    { g: "Make it yours", t: "Style: Editorial", i: "Aa", run: function () { setPref("style", "editorial"); } },
+    { g: "Make it yours", t: "Style: Boardroom", i: "Aa", run: function () { setPref("style", "boardroom"); } },
+    { g: "Make it yours", t: "Style: Lab", i: "Aa", run: function () { setPref("style", "lab"); } }
   ];
   function buildPalette() {
     pal = document.createElement("div");
@@ -512,6 +518,155 @@
     else if (e.key === "/" && !/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || "") && !(pal && pal.classList.contains("open"))) { e.preventDefault(); openPalette(); }
   });
 
+  /* ================================================================
+     Preferences, the "Who's visiting?" lens, and the contact form
+     ================================================================ */
+  function setPref(key, value) {
+    if (!window.SitePrefs) return;
+    var p = window.SitePrefs.read();
+    p[key] = value;
+    window.SitePrefs.save(p);
+    track("pref_change", { pref: key, value: value || "default" });
+    syncPrefControls();
+  }
+
+  function syncPrefControls() {
+    if (!window.SitePrefs) return;
+    var p = window.SitePrefs.read();
+    var theme = store("theme") || "";
+    $$("[data-pref]").forEach(function (group) {
+      var key = group.getAttribute("data-pref");
+      var current = key === "theme" ? theme : p[key];
+      $$("[role=radio]", group).forEach(function (b) {
+        var on = b.getAttribute("data-value") === current;
+        b.setAttribute("aria-checked", on ? "true" : "false");
+        b.tabIndex = on ? 0 : -1;
+      });
+    });
+  }
+
+  function initPrefs() {
+    if (!$("#prefs")) return;
+    $$("[data-pref]").forEach(function (group) {
+      var key = group.getAttribute("data-pref");
+      $$("[role=radio]", group).forEach(function (b) {
+        b.addEventListener("click", function () {
+          var v = b.getAttribute("data-value");
+          if (key === "theme") {
+            if (v) { document.documentElement.setAttribute("data-theme", v); store("theme", v); }
+            else { document.documentElement.removeAttribute("data-theme"); store("theme", null); }
+            track("pref_change", { pref: "theme", value: v || "system" });
+            syncPrefControls();
+          } else {
+            setPref(key, v);
+          }
+        });
+      });
+      radioKeys(group);
+    });
+    var reset = $("#prefs-reset");
+    if (reset) reset.addEventListener("click", function () {
+      store("prefs", null); store("theme", null);
+      document.documentElement.removeAttribute("data-theme");
+      window.SitePrefs.apply(window.SitePrefs.read());
+      track("pref_reset");
+      syncPrefControls();
+      toast("Back to the defaults");
+    });
+    syncPrefControls();
+  }
+
+  /* Arrow keys move between options in a radiogroup, as screen-reader users expect. */
+  function radioKeys(group) {
+    group.addEventListener("keydown", function (e) {
+      if (["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].indexOf(e.key) < 0) return;
+      var radios = $$("[role=radio]", group);
+      var i = radios.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      var next = radios[(i + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : radios.length - 1)) % radios.length];
+      next.focus(); next.click();
+    });
+  }
+
+  function initLens() {
+    $$("button[data-lens]").forEach(function (b) {
+      b.addEventListener("click", function () { setPref("lens", b.getAttribute("data-lens")); });
+    });
+  }
+
+  function initContact() {
+    var form = $("#contact-form");
+    if (!form) return;
+    var started = Date.now();
+    var reason = new URLSearchParams(location.search).get("reason");
+    var rating = "";
+    var reasons = $$("[data-reason]", form), ratings = $$("[data-rating]", form);
+    var status = $(".form-status", form);
+    function pickReason(r) {
+      reason = r;
+      reasons.forEach(function (b) { var on = b.getAttribute("data-reason") === r; b.setAttribute("aria-checked", on ? "true" : "false"); b.tabIndex = on || !r ? 0 : -1; });
+      var fb = r === "feedback";
+      $(".rating-field", form).hidden = !fb;
+      $(".company-field", form).hidden = fb;
+      $$(".opt", $("[name=email]", form).parentNode).forEach(function (o) { o.hidden = !fb; });
+      $("[name=message]", form).placeholder = fb ? "What worked, what didn't, what you'd add…" :
+        r === "hiring" ? "The role, the team, and the best way to reach you…" :
+        r === "advisory" ? "What you're building and where you're stuck…" : "";
+    }
+    reasons.forEach(function (b) { b.addEventListener("click", function () { pickReason(b.getAttribute("data-reason")); }); });
+    ratings.forEach(function (b) {
+      b.addEventListener("click", function () {
+        rating = b.getAttribute("data-rating");
+        ratings.forEach(function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
+      });
+    });
+    $$("[role=radiogroup]", form).forEach(radioKeys);
+    pickReason(reasons.some(function (b) { return b.getAttribute("data-reason") === reason; }) ? reason : "");
+
+    function field(n) { return $("[name=" + n + "]", form); }
+    function say(msg, err) { status.textContent = msg; status.classList.toggle("err", !!err); }
+    function mailtoLink(d) {
+      var body = d.message + "\n\n" + (d.name || "") + (d.company ? "\n" + d.company : "");
+      return "mailto:" + EMAIL + "?subject=" + encodeURIComponent("Portfolio: " + (d.reasonLabel || "Hello")) + "&body=" + encodeURIComponent(body);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var d = {
+        type: "contact", reason: reason || "other", rating: rating,
+        name: field("name").value.trim(), email: field("email").value.trim(), company: field("company").value.trim(),
+        message: field("message").value.trim(), website: field("website").value, elapsed: Date.now() - started
+      };
+      var picked = reasons.filter(function (b) { return b.getAttribute("data-reason") === d.reason; })[0];
+      d.reasonLabel = picked ? picked.textContent : "Something else";
+      ["email", "message"].forEach(function (n) { field(n).removeAttribute("aria-invalid"); });
+      if (!d.message) { field("message").setAttribute("aria-invalid", "true"); field("message").focus(); return say("Please add a message.", true); }
+      var needEmail = d.reason !== "feedback";
+      if ((needEmail && !d.email) || (d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email))) {
+        field("email").setAttribute("aria-invalid", "true"); field("email").focus();
+        return say(d.email ? "That email address doesn't look right." : "Please add your email so I can reply.", true);
+      }
+      if (!ASK_ENDPOINT) { location.href = mailtoLink(d); return; }
+      var btn = $("button[type=submit]", form);
+      btn.disabled = true; say("Sending…");
+      fetch(ASK_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(d) })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (!res || !res.ok) throw new Error((res && res.error) || "failed");
+          track("contact_submit", { reason: d.reason });
+          form.innerHTML = '<div class="sent"><h3>Thanks' + (d.name ? ", " + esc(d.name.split(" ")[0]) : "") + '.</h3><p>' +
+            (d.reason === "feedback" ? "Your feedback is on its way to me. It helps make this site better." : "Your message is on its way to my inbox, and I'll reply to " + esc(d.email) + ".") +
+            '</p><a class="btn ghost" href="index.html">Back to the home page</a></div>';
+        })
+        .catch(function () {
+          btn.disabled = false;
+          status.innerHTML = 'That didn\'t send. <a href="' + esc(mailtoLink(d)) + '">Email it instead</a>; your message will be filled in.';
+          status.classList.add("err");
+        });
+    });
+  }
+
   /* ---------- go ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
@@ -519,6 +674,9 @@
     openHash();
     initReveal();
     initAsk();
+    initPrefs();
+    initLens();
+    initContact();
     $$("details.case").forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });
     });

@@ -1,5 +1,9 @@
 /**
- * Portfolio "Ask" backend: a Google Apps Script web app.
+ * Portfolio backend: a Google Apps Script web app with two jobs.
+ *
+ * 1. "Ask": AI answers about Robert's experience (below).
+ * 2. Contact form: saves each message to the "Messages" tab and emails it to
+ *    the script owner, with Reply-To set to the sender (see answerContact_).
  *
  * The site's search runs in the visitor's browser, finds the most relevant
  * sections of the portfolio, and POSTs them here with the question. This
@@ -47,6 +51,7 @@ var ASK_SYSTEM_PROMPT_ = [
 function doPost(e) {
   var body = {};
   try { body = JSON.parse((e && e.postData && e.postData.contents) || "{}"); } catch (err) { return askOut_({ ok: false, error: "bad_request" }); }
+  if (body.type === "contact") return askOut_(answerContact_(body));
   return askOut_(answerQuestion_(body));
 }
 
@@ -169,4 +174,81 @@ function logQuestion_(q, sources, outcome) {
     if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Question", "Sections used", "Outcome"]);
     sheet.appendRow([new Date(), q, sources.map(function (s) { return s.title; }).join(" · "), outcome]);
   } catch (err) { /* logging must never break an answer */ }
+}
+
+/* ================= Contact form ================= */
+
+var CONTACT_DAILY_LIMIT_ = 25;
+var CONTACT_REASONS_ = {
+  hiring: "Hiring for a role",
+  advisory: "Advisory or consulting",
+  feedback: "Feedback on the site",
+  other: "Something else"
+};
+
+function answerContact_(body) {
+  // Bots fill the hidden "website" field and submit instantly; real people do neither.
+  if (String(body.website || "")) return { ok: true };
+  if (Number(body.elapsed || 0) < 3000) return { ok: false, error: "too_fast" };
+
+  var reason = CONTACT_REASONS_[body.reason] ? body.reason : "other";
+  var name = String(body.name || "").replace(/\s+/g, " ").trim().slice(0, 100);
+  var email = String(body.email || "").trim().slice(0, 200);
+  var company = String(body.company || "").replace(/\s+/g, " ").trim().slice(0, 120);
+  var message = String(body.message || "").trim().slice(0, 4000);
+  var rating = String(body.rating || "").replace(/[^a-z]/g, "").slice(0, 10);
+
+  if (message.length < 2) return { ok: false, error: "empty" };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "bad_email" };
+  if (reason !== "feedback" && !email) return { ok: false, error: "need_email" };
+
+  if (!takeContactQuota_()) return { ok: false, error: "daily_limit" };
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) {
+      var sheet = ss.getSheetByName("Messages") || ss.insertSheet("Messages");
+      if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Reason", "Name", "Email", "Company", "Rating", "Message"]);
+      sheet.appendRow([new Date(), CONTACT_REASONS_[reason], name, email, company, rating, message]);
+    }
+  } catch (err) { /* still try the email */ }
+
+  try {
+    var lines = [
+      "Reason: " + CONTACT_REASONS_[reason],
+      "Name: " + (name || "(not given)"),
+      "Email: " + (email || "(not given)"),
+      company ? "Company: " + company : null,
+      rating ? "Site rating: " + rating : null,
+      "",
+      message,
+      "",
+      "Sent from the contact form on portfolio.productadvisory.co"
+    ].filter(function (l) { return l !== null; });
+    var opts = { to: Session.getEffectiveUser().getEmail(), subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
+    if (email) opts.replyTo = email;
+    MailApp.sendEmail(opts);
+  } catch (err) {
+    return { ok: true, emailed: false };
+  }
+  return { ok: true };
+}
+
+function takeContactQuota_() {
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  var key = "contact_" + today;
+  var lock = null, locked = false;
+  try { lock = LockService.getScriptLock(); locked = lock.tryLock(5000); } catch (e) { /* carry on */ }
+  try {
+    props.getKeys().forEach(function (k) {
+      if (k.indexOf("contact_") === 0 && k !== key) props.deleteProperty(k);
+    });
+    var n = Number(props.getProperty(key) || 0);
+    if (n >= CONTACT_DAILY_LIMIT_) return false;
+    props.setProperty(key, String(n + 1));
+    return true;
+  } finally {
+    if (locked) lock.releaseLock();
+  }
 }
