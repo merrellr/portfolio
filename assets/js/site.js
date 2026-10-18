@@ -415,7 +415,7 @@
     { g: "Go to", t: "Resume", i: "≡", run: function () { location.href = "resume.html"; } },
     { g: "Go to", t: "Writing & frameworks", i: "✎", run: function () { location.href = "writing.html"; } },
     { g: "Do", t: "Copy email address", i: "@", hint: EMAIL, run: copyEmail },
-    { g: "Do", t: "Download resume (PDF)", i: "↓", run: function () { location.href = "assets/Robert-Merrell-Resume.pdf"; } },
+    { g: "Do", t: "Open resume (PDF)", i: "↗", run: function () { window.open("assets/Robert-Merrell-Resume.pdf", "_blank", "noopener"); } },
     { g: "Do", t: "Try the PM + AI skill assessment", i: "↗", hint: "assessment.productadvisory.co", run: function () { window.open("https://assessment.productadvisory.co/", "_blank", "noopener"); } },
     { g: "Do", t: "Open LinkedIn", i: "in", run: function () { window.open("https://www.linkedin.com/in/robertmerrell/", "_blank", "noopener"); } },
     { g: "Do", t: "Subscribe to the Product+ newsletter", i: "+", run: function () { window.open("https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7391081463410196482", "_blank", "noopener"); } },
