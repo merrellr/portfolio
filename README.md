@@ -12,6 +12,7 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
 | Writing & frameworks | `writing.html` |
 | Contact form | `contact.html` (posts to the same Apps Script as Ask) |
 | Make it yours (preferences) | `preferences.html` |
+| One-page summary for printing | `one-pager.html` (fits one US Letter page; QR code in `assets/img/qr.svg`) |
 | Old Google Sites links (`/home`, `/resume`, `/portfolio`, `/blog`) | `404.html` redirects them |
 
 ## How things work
@@ -33,6 +34,19 @@ from local storage and sets attributes on `<html>`: `data-style` (editorial, boa
 `data-text`, `data-density`, `data-motion` and `data-lens`. `site.css` does the rest with custom properties, with
 light and dark versions of each style and accent. The "Who's visiting?" lens shows a matching "Start here" card on
 the home page. New pages must include `<script src="assets/js/prefs.js"></script>` right after the stylesheet.
+
+### Links that carry a look, a view or a question
+
+Any page URL can carry settings. They apply for that visit only, and the visitor can keep them or go back to
+their own (a bar at the bottom offers both). Links that only set `lens` show no bar.
+
+| Link | What it does |
+| --- | --- |
+| `/?lens=recruiter` | Opens with the recruiter "Start here" card (also `hiring`, `product`) |
+| `/?style=lab&accent=plum&mode=dark` | A shared look (`style`, `accent`, `text`, `density`, `motion`, `mode`) |
+| `/?ask=Has he integrated with Epic` | Scrolls to Ask and answers that question |
+
+Make it yours has a **Share this look** button, and each AI answer has **Copy a link to this question**.
 
 ## Contact form
 

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One-pager · Robert Merrell</title>
+<meta name="description" content="A one-page summary of Robert Merrell, healthcare product executive, ready to print or save as PDF.">
+<meta property="og:title" content="One-pager · Robert Merrell">
+<meta property="og:description" content="A one-page summary, ready to print or save as PDF.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://portfolio.productadvisory.co/one-pager.html">
+<meta property="og:image" content="https://portfolio.productadvisory.co/assets/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://portfolio.productadvisory.co/one-pager.html">
+<meta name="theme-color" content="#f5f2ec">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/prefs.js"></script>
+<script src="assets/js/site.js" defer></script>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-62QKHPVHCM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-62QKHPVHCM');
+</script>
+
+<style>
+  /* One-pager: a fixed, print-friendly sheet. Colours are fixed so it prints the same in every style. */
+  .op-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; max-width: 8.5in; margin: 24px auto 16px; padding: 0 16px; }
+  .op-bar p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .sheet {
+    --i: #16181d; --i2: #3d424c; --m: #6b707a; --l: #ddd6ca; --a: #0b7a64; --w: #c94a16;
+    width: 8.5in; max-width: calc(100% - 24px); min-height: 11in; margin: 0 auto 48px; background: #fff; color: var(--i);
+    padding: .4in .5in .36in; box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 16px 48px rgba(0,0,0,.12); border-radius: 4px;
+    font: 400 9.1pt/1.35 "Inter", system-ui, sans-serif;
+  }
+  .sheet a { color: inherit; text-decoration: none; }
+  .op-head { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; border-bottom: 2px solid var(--i); padding-bottom: 12pt; }
+  .op-head h1 { font: 500 27pt/1 "Fraunces", Georgia, serif; letter-spacing: -.02em; margin: 0 0 5pt; }
+  .op-title { font-weight: 600; color: var(--a); margin: 0 0 6pt; }
+  .op-contact { color: var(--i2); font-size: 8.8pt; margin: 0; }
+  .op-qr { text-align: center; font-size: 7pt; color: var(--m); width: 92px; }
+  .op-qr svg { display: block; margin: 0 auto 3pt; }
+  .op-summary { margin: 9pt 0 9pt; color: var(--i2); font-size: 9.5pt; }
+  .op-stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--l); border-radius: 6px; margin-bottom: 11pt; }
+  .op-stats div { padding: 7pt 10pt; }
+  .op-stats div + div { border-left: 1px solid var(--l); }
+  .op-stats b { display: block; font: 500 17pt/1.05 "Fraunces", Georgia, serif; color: var(--w); }
+  .op-stats span { font-size: 7.8pt; color: var(--m); line-height: 1.3; display: block; margin-top: 2pt; }
+  .op-cols { display: grid; grid-template-columns: 1.55fr 1fr; gap: 22pt; }
+  .sheet h2 { font: 600 7.6pt/1 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--a); margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1px solid var(--l); }
+  .sheet h2 + * { margin-top: 0; }
+  .sheet ul { margin: 0 0 10pt; padding-left: 1.05em; }
+  .sheet li { margin: 0 0 3.2pt; }
+  .sheet li b { font-weight: 600; }
+  .op-career { list-style: none; padding: 0 !important; }
+  .op-career li { display: grid; grid-template-columns: 50pt 1fr; gap: 6pt; margin-bottom: 2.6pt; }
+  .op-career .y { font: 500 7.6pt/1.6 "JetBrains Mono", monospace; color: var(--m); }
+  .op-career small { display: block; color: var(--m); font-size: 8pt; }
+  .op-tags { display: flex; flex-wrap: wrap; gap: 3.5pt; margin-bottom: 10pt; }
+  .op-tags span { border: 1px solid var(--l); border-radius: 99px; padding: 1.5pt 6pt; font-size: 7.8pt; color: var(--i2); }
+  .op-foot { margin-top: 6pt; padding-top: 9pt; border-top: 2px solid var(--i); display: flex; justify-content: space-between; gap: 16px; font-size: 8.6pt; color: var(--i2); }
+  .op-foot b { color: var(--i); }
+  @media (max-width: 760px) {
+    .sheet { padding: 20px; min-height: 0; font-size: 10pt; }
+    .op-cols, .op-head { grid-template-columns: 1fr; }
+    .op-stats { grid-template-columns: 1fr 1fr; }
+    .op-stats div + div { border-left: 0; }
+    .op-foot { flex-direction: column; }
+  }
+  @page { size: letter; margin: 0; }
+  @media print {
+    body { background: #fff !important; background-image: none !important; }
+    .op-bar, .skip { display: none !important; }
+    .sheet { box-shadow: none; margin: 0; max-width: none; border-radius: 0; min-height: 0; width: 8.5in; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#sheet">Skip to the one-pager</a>
+<div class="op-bar">
+  <a class="btn ghost" href="index.html">← Back to the site</a>
+  <p>One page, ready for an interview. Choose "Save as PDF" in the print dialog to keep a copy.</p>
+  <button class="btn" type="button" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<article class="sheet" id="sheet">
+  <header class="op-head">
+    <div>
+      <h1>Robert Merrell</h1>
+      <p class="op-title">Healthcare Product Executive · AI-Enabled Portfolios · Product Organization Builder</p>
+      <p class="op-contact">Chicago, IL · onsite or remote &nbsp;·&nbsp; <a href="mailto:merrell.robert.j@gmail.com">merrell.robert.j@gmail.com</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/robertmerrell/">linkedin.com/in/robertmerrell</a> &nbsp;·&nbsp; <a href="https://portfolio.productadvisory.co">portfolio.productadvisory.co</a></p>
+    </div>
+    <a class="op-qr" href="https://portfolio.productadvisory.co"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" width="88" height="88" class="segno"><title>QR code: portfolio.productadvisory.co</title><path class="qrline" stroke="#16181d" d="M0 0.5h7m3 0h1m1 0h1m1 0h1m1 0h1m2 0h1m2 0h7m-29 1h1m5 0h1m2 0h1m2 0h1m2 0h1m1 0h2m3 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m1 0h2m4 0h2m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h3m1 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h1m3 0h3m1 0h1m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-18 1h1m1 0h1m2 0h5m-21 1h1m2 0h1m1 0h2m1 0h5m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m-23 1h1m2 0h1m6 0h3m2 0h3m1 0h3m2 0h1m2 0h1m-26 1h1m1 0h2m1 0h1m2 0h4m4 0h3m2 0h4m-28 1h1m2 0h2m3 0h1m3 0h2m2 0h1m3 0h4m2 0h2m-27 1h6m1 0h4m2 0h4m3 0h3m1 0h1m1 0h2m-26 1h1m5 0h1m3 0h2m1 0h2m1 0h3m-22 1h3m1 0h4m3 0h1m1 0h2m2 0h2m2 0h1m1 0h1m1 0h4m-29 1h1m2 0h1m1 0h1m2 0h2m1 0h1m3 0h1m1 0h3m2 0h2m1 0h1m1 0h1m-27 1h1m2 0h3m2 0h5m1 0h3m1 0h1m1 0h1m1 0h1m3 0h1m-27 1h1m5 0h1m2 0h5m1 0h1m4 0h3m1 0h1m2 0h1m-29 1h1m5 0h1m1 0h1m3 0h1m1 0h1m1 0h1m3 0h2m1 0h1m3 0h2m-27 1h1m1 0h2m2 0h2m4 0h1m1 0h2m1 0h4m1 0h1m2 0h2m-29 1h1m2 0h4m2 0h1m1 0h2m6 0h6m1 0h1m-19 1h1m1 0h2m2 0h1m1 0h5m3 0h1m1 0h3m-29 1h7m9 0h2m2 0h1m1 0h1m1 0h1m2 0h1m-28 1h1m5 0h1m1 0h3m3 0h1m1 0h1m2 0h2m3 0h4m-28 1h1m1 0h3m1 0h1m3 0h3m2 0h3m2 0h5m2 0h2m-29 1h1m1 0h3m1 0h1m1 0h4m7 0h2m1 0h6m-28 1h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h1m3 0h4m3 0h3m1 0h1m-29 1h1m5 0h1m3 0h1m6 0h7m3 0h1m-28 1h7m1 0h1m1 0h3m1 0h1m1 0h2m2 0h2m2 0h1m2 0h1"/></svg>
+ Scan for the full portfolio</a>
+  </header>
+
+  <p class="op-summary">26 years in product, 22 of them full time in healthcare, leading product, data and AI strategy across health systems, payers, life sciences, diagnostics and digital health. Twice Head of Product on an executive leadership team (Vynca, American Hospital Association), building both product organizations from the ground up.</p>
+
+  <div class="op-stats">
+    <div><b>$200M+</b><span>added revenue at Invitae</span></div>
+    <div><b>$33M+</b><span>revenue driven at Vynca</span></div>
+    <div><b>95%</b><span>AI patient-matching accuracy</span></div>
+    <div><b>65%</b><span>reduction in time to market</span></div>
+  </div>
+
+  <div class="op-cols">
+    <div>
+      <h2>Selected outcomes</h2>
+      <ul>
+        <li><b>Invitae:</b> $200M+ in added revenue through AI/ML test-order efficiencies, billing automation and EMR optimization. Epic Aura integrations grew health-system adoption 15% in six months.</li>
+        <li><b>Vynca:</b> built the product organization from scratch. 73% digital completion for advance care planning, and implementation time cut by about two months.</li>
+        <li><b>Lucem Health:</b> 60% patient engagement, twice the industry benchmark, and $10M+ in incremental annual revenue across arrhythmia, oncology and GLP-1.</li>
+        <li><b>American Hospital Association:</b> 94% lower operating expenses in six months by consolidating Health Forum's data infrastructure.</li>
+        <li><b>Allscripts (ECIN):</b> 50 to 800+ hospital clients and $3M to $120M in revenue, with 98% client retention over six years.</li>
+      </ul>
+      <h2>AI that shipped</h2>
+      <ul>
+        <li><b>Patient matching</b> across health systems and state registries at 95%+ accuracy</li>
+        <li><b>LLM document matching</b> in all 50 states, cutting manual review by 70%+</li>
+        <li><b>Natural-language analytics</b> over EMR data: time to market from 8 weeks to 1, 80% adoption</li>
+        <li><b>Payer-aware ordering</b> and <b>LLM-written appeal letters</b> for reimbursement</li>
+        <li><b>Built myself:</b> an AI-graded PM skills assessment and learning platform</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Career</h2>
+      <ul class="op-career">
+        <li><span class="y">2026–</span><span>NAHQ<small>VP, Product &amp; Portfolio Operations</small></span></li>
+        <li><span class="y">2021–</span><span>Product Advisory<small>Founder &amp; Fractional CPO</small></span></li>
+        <li><span class="y">2024–26</span><span>Lucem Health<small>Director of Product Management</small></span></li>
+        <li><span class="y">2023–24</span><span>Invitae<small>Director of Product Management</small></span></li>
+        <li><span class="y">2018–23</span><span>Vynca<small>Head of Product · Executive Leadership Team</small></span></li>
+        <li><span class="y">2015–18</span><span>American Hospital Association<small>Head of Product &amp; Data · ELT</small></span></li>
+        <li><span class="y">2012–15</span><span>Aetna (Practice iQ)<small>Director of Product Management</small></span></li>
+        <li><span class="y">2011–12</span><span>Accretive Health<small>Manager, Technology &amp; Product</small></span></li>
+        <li><span class="y">2006–11</span><span>Allscripts (ECIN)<small>Solutions Management · Product</small></span></li>
+      </ul>
+      <h2>Strengths</h2>
+      <div class="op-tags"><span>P&amp;L ownership</span><span>Board &amp; investor communication</span><span>AI/ML product strategy</span><span>Epic, FHIR, HL7</span><span>HIPAA · SOC 2 · HITRUST</span><span>Go-to-market</span><span>Org design &amp; scaling</span><span>M&amp;A integration</span></div>
+      <h2>Education</h2>
+      <ul>
+        <li>M.S., Information Systems Management, Keller Graduate School</li>
+        <li>B.S., Sociology, Iowa State University</li>
+        <li>Pragmatic Marketing Certified, Level VI</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="op-foot">
+    <span><b>Open to Chief Product Officer and VP of Product roles</b> in healthcare and health tech.</span>
+    <span>Case studies, writing and an AI you can ask: <b>portfolio.productadvisory.co</b></span>
+  </footer>
+</article>
+</body>
+</html>

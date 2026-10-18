@@ -48,6 +48,11 @@
     toastEl._t = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
   }
 
+  function copyText(text, msg) {
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { toast(msg); }, function () { toast("Select the link and copy it"); });
+    else toast("Select the link and copy it");
+  }
+
   function copyEmail() {
     track("copy_email");
     var done = function () { toast("Email copied: " + EMAIL); };
@@ -56,8 +61,6 @@
   }
 
   /* ---------- theme ---------- */
-  var saved = store("theme");
-  if (saved === "light" || saved === "dark") document.documentElement.setAttribute("data-theme", saved);
   function isDark() {
     var t = document.documentElement.getAttribute("data-theme");
     if (t) return t === "dark";
@@ -374,7 +377,12 @@
         track("ask_answer", { outcome: data && data.ok ? "answered" : (data && data.error) || "error" });
         if (data && data.ok && data.answer) {
           box2.innerHTML = '<span class="ask-ai">AI answer</span>' + renderAnswer(data.answer, results) +
-            '<p class="ask-fine">Written by AI from the sections below. Check the linked sources for the detail.</p>';
+            '<p class="ask-fine">Written by AI from the sections below. Check the linked sources for the detail.</p>' +
+            '<button type="button" class="ask-share">Copy a link to this question</button>';
+          $(".ask-share", box2).addEventListener("click", function () {
+            copyText(askLink(q), "Link copied. It opens this page and asks the question");
+            track("share_question");
+          });
         } else {
           box2.innerHTML = '<p class="ask-fine">' + (data && data.error === "daily_limit"
             ? "AI answers have reached today's limit. The most relevant sections are below."
@@ -390,9 +398,18 @@
     $$(".ask-suggest button", box).forEach(function (b) { b.addEventListener("click", function () { run(b.textContent); }); });
     input.addEventListener("focus", function () { buildIndex(); }, { once: true });
     var q = new URLSearchParams(location.search).get("ask");
-    if (q) { run(q); }
+    if (q) {
+      run(q);
+      setTimeout(function () { $("#ask-section").scrollIntoView({ block: "start" }); }, 50);
+    }
     box._run = run;
   }
+  function askLink(q) {
+    var u = new URL("./", location.href);
+    u.searchParams.set("ask", q);
+    return u.toString();
+  }
+
   /* Citations like [2] or [1, 3] become links to the matching source. */
   function renderAnswer(text, results) {
     return esc(text).split(/\n{2,}/).map(function (para) {
@@ -445,6 +462,7 @@
     { g: "Do", t: "Toggle light / dark", i: "◐", run: toggleTheme },
     { g: "Do", t: "Send Robert a message", i: "✉", run: function () { location.href = "contact.html"; } },
     { g: "Make it yours", t: "Open all preferences", i: "⚙", run: function () { location.href = "preferences.html"; } },
+    { g: "Do", t: "Print the one-pager", i: "⎙", run: function () { location.href = "one-pager.html"; } },
     { g: "Make it yours", t: "Style: Editorial", i: "Aa", run: function () { setPref("style", "editorial"); } },
     { g: "Make it yours", t: "Style: Boardroom", i: "Aa", run: function () { setPref("style", "boardroom"); } },
     { g: "Make it yours", t: "Style: Lab", i: "Aa", run: function () { setPref("style", "lab"); } }
@@ -523,7 +541,7 @@
      ================================================================ */
   function setPref(key, value) {
     if (!window.SitePrefs) return;
-    var p = window.SitePrefs.read();
+    var p = window.SitePrefs.current();
     p[key] = value;
     window.SitePrefs.save(p);
     track("pref_change", { pref: key, value: value || "default" });
@@ -532,8 +550,8 @@
 
   function syncPrefControls() {
     if (!window.SitePrefs) return;
-    var p = window.SitePrefs.read();
-    var theme = store("theme") || "";
+    var p = window.SitePrefs.current();
+    var theme = window.SitePrefs.mode();
     $$("[data-pref]").forEach(function (group) {
       var key = group.getAttribute("data-pref");
       var current = key === "theme" ? theme : p[key];
@@ -553,6 +571,7 @@
         b.addEventListener("click", function () {
           var v = b.getAttribute("data-value");
           if (key === "theme") {
+            if (window.SitePrefs.shared()) window.SitePrefs.keepShared();
             if (v) { document.documentElement.setAttribute("data-theme", v); store("theme", v); }
             else { document.documentElement.removeAttribute("data-theme"); store("theme", null); }
             track("pref_change", { pref: "theme", value: v || "system" });
@@ -567,11 +586,18 @@
     var reset = $("#prefs-reset");
     if (reset) reset.addEventListener("click", function () {
       store("prefs", null); store("theme", null);
-      document.documentElement.removeAttribute("data-theme");
-      window.SitePrefs.apply(window.SitePrefs.read());
+      window.SitePrefs.dropShared();
       track("pref_reset");
       syncPrefControls();
       toast("Back to the defaults");
+    });
+    var share = $("#prefs-share");
+    if (share) share.addEventListener("click", function () {
+      var url = window.SitePrefs.shareUrl(window.SitePrefs.current(), window.SitePrefs.mode());
+      var out = $("#prefs-share-url");
+      out.value = url; out.hidden = false; out.select();
+      copyText(url, "Link copied. Anyone who opens it sees this look");
+      track("share_look");
     });
     syncPrefControls();
   }
@@ -667,6 +693,34 @@
     });
   }
 
+  var STYLE_NAMES = { editorial: "Editorial", boardroom: "Boardroom", lab: "Lab" };
+  var LENS_NAMES = { recruiter: "recruiter view", hiring: "hiring manager view", product: "product manager view" };
+  function initSharedBar() {
+    var sp = window.SitePrefs, s = sp && sp.shared();
+    if (!s) return;
+    // A link that only sets the lens (e.g. ?lens=recruiter sent to a recruiter) needs no bar.
+    var looks = Object.keys(s.prefs).filter(function (k) { return k !== "lens"; });
+    if (!looks.length && !s.mode) return;
+    var p = sp.current(), bits = [];
+    if (s.prefs.style) bits.push(STYLE_NAMES[p.style]);
+    if (s.prefs.accent) bits.push(p.accent.charAt(0).toUpperCase() + p.accent.slice(1));
+    if (s.mode) bits.push(s.mode === "dark" ? "Dark" : "Light");
+    if (s.prefs.lens) bits.push(LENS_NAMES[p.lens]);
+    var bar = document.createElement("div");
+    bar.className = "shared-bar"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Shared look");
+    bar.innerHTML = '<span>You\'re seeing a shared look' + (bits.length ? ": <b>" + esc(bits.join(" · ")) + "</b>" : "") + '.</span>' +
+      '<button type="button" class="btn" data-k="keep">Keep it</button><button type="button" class="btn ghost" data-k="drop">Use my own</button>';
+    document.body.appendChild(bar);
+    bar.addEventListener("click", function (e) {
+      var k = e.target.getAttribute && e.target.getAttribute("data-k");
+      if (!k) return;
+      if (k === "keep") { sp.keepShared(); toast("Saved as your look"); } else { sp.dropShared(); }
+      track("shared_look", { action: k });
+      bar.remove();
+      syncPrefControls();
+    });
+  }
+
   /* ---------- go ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
@@ -677,6 +731,7 @@
     initPrefs();
     initLens();
     initContact();
+    initSharedBar();
     $$("details.case").forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });
     });
