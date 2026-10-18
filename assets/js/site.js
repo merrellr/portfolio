@@ -31,6 +31,13 @@
     return p && p.indexOf(".html") > -1 ? p : "index.html";
   }
 
+  /* ---------- analytics ----------
+     Google Analytics records page views, outbound links and PDF opens on its
+     own. These events cover what it can't see. Question text is never sent. */
+  function track(name, params) {
+    try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) { /* never break the page */ }
+  }
+
   /* ---------- toast ---------- */
   var toastEl;
   function toast(msg) {
@@ -42,6 +49,7 @@
   }
 
   function copyEmail() {
+    track("copy_email");
     var done = function () { toast("Email copied: " + EMAIL); };
     if (navigator.clipboard) navigator.clipboard.writeText(EMAIL).then(done, function () { location.href = "mailto:" + EMAIL; });
     else location.href = "mailto:" + EMAIL;
@@ -139,9 +147,10 @@
         var f = c.getAttribute("data-filter");
         var n = f === "all" ? items.length : items.filter(function (i) { return (" " + i.getAttribute("data-tags") + " ").indexOf(" " + f + " ") > -1; }).length;
         var badge = document.createElement("span"); badge.className = "n"; badge.textContent = n; c.appendChild(badge);
-        c.addEventListener("click", function () { apply(f); });
+        c.addEventListener("click", function () { apply(f, true); });
       });
-      function apply(f) {
+      function apply(f, fromClick) {
+        if (fromClick) track("filter", { list: bar.getAttribute("data-filter-for").slice(1), filter: f });
         chips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-filter") === f ? "true" : "false"); });
         items.forEach(function (i) {
           var hit = f === "all" || (" " + i.getAttribute("data-tags") + " ").indexOf(" " + f + " ") > -1;
@@ -199,7 +208,15 @@
     launch: ["launched", "go-to-market", "gtm"],
     education: ["degree", "masters", "university", "certified", "certification"],
     built: ["build", "building", "built", "developed", "launched", "designed"],
-    product: ["products", "portfolio", "platform"]
+    product: ["products", "portfolio", "platform"],
+    written: ["article", "articles", "writing", "newsletter", "linkedin"],
+    write: ["article", "articles", "writing", "newsletter"],
+    wrote: ["article", "articles", "writing"],
+    article: ["articles", "writing", "newsletter"],
+    articles: ["article", "writing", "newsletter"],
+    blog: ["article", "articles", "writing", "newsletter"],
+    agents: ["agent", "agentic", "copilots", "ai"],
+    agentic: ["agents", "agent", "copilots", "ai"]
   };
   function tokens(s) {
     return (s.toLowerCase().replace(/[’']/g, "").match(/\$|[a-z0-9][a-z0-9+\-.]*[a-z0-9]|[a-z0-9]/g) || [])
@@ -279,8 +296,11 @@
       }).filter(function (r) { return r.s > 0.6; });
       scored.sort(function (a, c) { return c.s - a.s; });
       // at most one summary block from the home page, so the answers point at the detail
-      var homeSeen = false;
+      // and each section once (the home page repeats some case-study titles)
+      var homeSeen = false, titles = {};
       scored = scored.filter(function (r) {
+        if (titles[r.d.title]) return false;
+        titles[r.d.title] = 1;
         if (r.d.kind !== "Home") return true;
         if (homeSeen) return false;
         homeSeen = true; return true;
@@ -318,6 +338,7 @@
       if (!q) return;
       input.value = q;
       var mine = ++seq;
+      track("ask_question", { mode: ASK_ENDPOINT ? "ai" : "search" });
       search(q).then(function (r) {
         if (mine !== seq) return;
         var html = '<div class="ask-q">“' + esc(q) + '”</div>';
@@ -349,6 +370,7 @@
       }).then(function (res) { return res.json(); }).then(function (data) {
         if (mine !== seq || !box2) return;
         box2.removeAttribute("aria-busy");
+        track("ask_answer", { outcome: data && data.ok ? "answered" : (data && data.error) || "error" });
         if (data && data.ok && data.answer) {
           box2.innerHTML = '<span class="ask-ai">AI answer</span>' + renderAnswer(data.answer, results) +
             '<p class="ask-fine">Written by AI from the sections below. Check the linked sources for the detail.</p>';
@@ -472,6 +494,7 @@
   }
   function openPalette() {
     if (!pal) buildPalette();
+    track("command_menu_open");
     lastFocus = document.activeElement;
     pal.classList.add("open");
     palInput.value = "";
@@ -496,6 +519,9 @@
     openHash();
     initReveal();
     initAsk();
+    $$("details.case").forEach(function (d) {
+      d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });
+    });
     var y = $("#year"); if (y) y.textContent = new Date().getFullYear();
   });
   window.addEventListener("hashchange", openHash);
