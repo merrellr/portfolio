@@ -35,6 +35,11 @@ from local storage and sets attributes on `<html>`: `data-style` (editorial, boa
 light and dark versions of each style and accent. The "Who's visiting?" lens shows a matching "Start here" card on
 the home page. New pages must include `<script src="assets/js/prefs.js"></script>` right after the stylesheet.
 
+**Shared with productadvisory.co:** accent, text size, density, motion and colour mode are also kept in a preference
+cookie on `.productadvisory.co` (`pa_look`) that www.productadvisory.co and assessment.productadvisory.co use too, so
+a look chosen on one site opens the others the same way. Style stays the portfolio's own. Only changed settings are
+written; "Reset everything" clears it.
+
 ### Links that carry a look, a view or a question
 
 Any page URL can carry settings. They apply for that visit only, and the visitor can keep them or go back to

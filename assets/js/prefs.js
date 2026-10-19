@@ -37,8 +37,46 @@
   }
   function parse(json) { try { return JSON.parse(json || "null"); } catch (e) { return null; } }
 
+  /* ---- the look shared across productadvisory.co sites ----
+     www.productadvisory.co, assessment.productadvisory.co and the portfolio keep the
+     visitor's look in one preference cookie on .productadvisory.co ("pa_look"), so a
+     choice made on one site opens the others the same way. Only the settings that
+     change are written. No personal data. */
+  var LOOK = "pa_look";
+  function lookDomain() {
+    var h = location.hostname;
+    return h === "productadvisory.co" || /\.productadvisory\.co$/.test(h) ? "productadvisory.co" : "";
+  }
+  function readLook() {
+    var m = (document.cookie || "").match(/(?:^|;\s*)pa_look=([^;]*)/);
+    var v = m ? parse(decodeURIComponent(m[1])) : null;
+    if (!v && !lookDomain()) v = parse(get("localStorage", LOOK));
+    return v && typeof v === "object" ? v : null;
+  }
+  function writeLook(changes) {
+    var keys = Object.keys(changes);
+    if (!keys.length) return;
+    var v = readLook() || {};
+    keys.forEach(function (k) { v[k] = changes[k]; });
+    var d = lookDomain();
+    if (d) {
+      try { document.cookie = LOOK + "=" + encodeURIComponent(JSON.stringify(v)) + "; Domain=" + d + "; Path=/; Max-Age=31536000; SameSite=Lax; Secure"; } catch (e) { /* cookies blocked */ }
+    } else set("localStorage", LOOK, JSON.stringify(v));
+  }
+  function clearLook() {
+    var d = lookDomain();
+    if (d) { try { document.cookie = LOOK + "=; Domain=" + d + "; Path=/; Max-Age=0; SameSite=Lax; Secure"; } catch (e) { /* ignore */ } }
+    else set("localStorage", LOOK, null);
+  }
+  // The portfolio's styles differ from productadvisory.co's, so style stays its own.
+  var SHARED = ["accent", "text", "density", "motion"];
+
   /** The visitor's own saved choices. */
-  function read() { return clean(parse(get("localStorage", "prefs")) || {}); }
+  function read() {
+    var p = parse(get("localStorage", "prefs")) || {}, look = readLook();
+    if (look) SHARED.forEach(function (k) { if (k in look && CHOICES[k].indexOf(look[k]) > -1) p[k] = look[k]; });
+    return clean(p);
+  }
 
   /** A look shared through the URL (this visit only), or null. */
   function shared() { return parse(get("sessionStorage", "sharedLook")); }
@@ -55,6 +93,8 @@
   function mode() {
     var s = shared();
     if (s && s.mode) return s.mode;
+    var look = readLook();
+    if (look && "mode" in look) return MODES.indexOf(look.mode) > -1 ? look.mode : "";
     var t = get("localStorage", "theme");
     return MODES.indexOf(t) > -1 ? t : "";
   }
@@ -76,8 +116,11 @@
 
   /** Saving your own choice replaces any shared look. */
   function save(p) {
+    var before = read(), after = clean(p), changes = {};
+    SHARED.forEach(function (k) { if (after[k] !== before[k]) changes[k] = after[k]; });
+    writeLook(changes);
     set("sessionStorage", "sharedLook", null);
-    set("localStorage", "prefs", JSON.stringify(clean(p)));
+    set("localStorage", "prefs", JSON.stringify(after));
     apply(current());
   }
 
@@ -85,8 +128,24 @@
     var s = shared();
     if (!s) return;
     var p = current();
-    if (s.mode) set("localStorage", "theme", s.mode);
+    if (s.mode) { set("localStorage", "theme", s.mode); writeLook({ mode: s.mode }); }
     save(p);
+  }
+
+  /** Light, dark, or "" to follow the device. Saved here and shared with the other sites. */
+  function setMode(m) {
+    if (shared()) keepShared();
+    set("localStorage", "theme", MODES.indexOf(m) > -1 ? m : null);
+    writeLook({ mode: MODES.indexOf(m) > -1 ? m : "" });
+    apply(current());
+  }
+
+  /** Back to the defaults here and on the other sites. */
+  function reset() {
+    set("localStorage", "prefs", null);
+    set("localStorage", "theme", null);
+    clearLook();
+    dropShared();
   }
 
   function dropShared() {
@@ -123,7 +182,7 @@
   window.SitePrefs = {
     DEFAULTS: DEFAULTS, CHOICES: CHOICES,
     read: read, current: current, shared: shared, mode: mode,
-    save: save, apply: apply, keepShared: keepShared, dropShared: dropShared, shareUrl: shareUrl
+    save: save, setMode: setMode, reset: reset, apply: apply, keepShared: keepShared, dropShared: dropShared, shareUrl: shareUrl
   };
   apply(current());
 })();
