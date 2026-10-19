@@ -416,6 +416,22 @@ footer.site .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-cont
 footer.site nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 footer.site a { text-decoration: none; }
 
+footer.site .linklike { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+footer.site .linklike:hover { color: var(--ink); }
+
+/* ---------- cookie consent ---------- */
+.consent { position: fixed; z-index: 90; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(760px, calc(100% - 24px)); display: flex; gap: 18px; align-items: center; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); box-shadow: 0 12px 40px rgba(0, 0, 0, .18); padding: 16px 18px; }
+.consent-text { flex: 1; min-width: 0; }
+.consent b { display: block; margin-bottom: 2px; }
+.consent p { margin: 0; font-size: .9rem; line-height: 1.5; color: var(--ink-2); }
+.consent a { color: var(--accent); }
+.consent .consent-now { margin-top: 6px; color: var(--muted); font-size: .85rem; }
+.consent .btn-row { flex: none; flex-wrap: nowrap; }
+.consent .btn { padding: 9px 18px; font-size: .9rem; }
+@media (max-width: 640px) { .consent { flex-direction: column; align-items: stretch; } .consent .btn-row .btn { flex: 1; justify-content: center; } }
+body.has-consent .shared-bar { bottom: 170px; }
+@media print { .consent { display: none !important; } }
+
 /* ---------- command palette ---------- */
 .palette-backdrop {
   position: fixed; inset: 0; z-index: 90; background: rgba(10, 12, 15, .45);

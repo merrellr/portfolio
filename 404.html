@@ -16,13 +16,14 @@
     if (map[p]) location.replace(map[p]);
   })();
 </script>
+<script src="/assets/js/consent.js"></script>
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-62QKHPVHCM"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-62QKHPVHCM');
+  gtag('config', 'G-62QKHPVHCM', { allow_google_signals: false, allow_ad_personalization_signals: false });
 </script>
 </head>
 <body>

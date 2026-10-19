@@ -22,13 +22,14 @@
 <link rel="stylesheet" href="assets/css/site.css">
 <script src="assets/js/prefs.js"></script>
 <script src="assets/js/site.js" defer></script>
+<script src="assets/js/consent.js"></script>
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-62QKHPVHCM"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-62QKHPVHCM');
+  gtag('config', 'G-62QKHPVHCM', { allow_google_signals: false, allow_ad_personalization_signals: false });
 </script>
 </head>
 <body>
@@ -124,6 +125,7 @@
       <a href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7391081463410196482" target="_blank" rel="noopener">Product+ newsletter</a>
       <a href="https://www.productadvisory.co/" target="_blank" rel="noopener">Product Advisory</a>
       <a href="https://github.com/merrellr" target="_blank" rel="noopener">GitHub</a>
+      <button type="button" class="linklike" data-action="cookies">Cookie settings</button>
     </nav>
   </div>
 </footer>

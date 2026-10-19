@@ -721,6 +721,38 @@
     });
   }
 
+  /* ---------- cookie consent banner ----------
+     consent.js (in <head>) sets Google Consent Mode defaults by region and
+     decides whether this visitor needs asking: no saved choice and a device
+     time zone in Europe. A choice is remembered; "Cookie settings" reopens it. */
+  function initConsent() {
+    var C = window.PAConsent;
+    if (!C) return;
+    var bar;
+    function close() { if (bar) { bar.remove(); bar = null; document.body.classList.remove("has-consent"); } }
+    function show() {
+      if (bar) return;
+      if (C.privacySignal && C.privacySignal()) { toast("Your browser asks sites not to track you, so analytics cookies stay off"); return; }
+      var cur = C.choice();
+      bar = document.createElement("div");
+      bar.className = "consent"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Cookies and analytics");
+      bar.innerHTML = '<div class="consent-text"><b>Cookies and analytics</b><p>I use Google Analytics to see which pages are used, so I can improve this site. It sets cookies on your device. It isn\'t used for advertising. <a href="https://www.productadvisory.co/privacy-policy.html#cookies" target="_blank" rel="noopener">Privacy Policy</a></p>' +
+        (cur ? '<p class="consent-now">Your current choice: ' + (cur === "granted" ? "Accepted" : "Declined") + ".</p>" : "") + "</div>" +
+        '<div class="btn-row"><button type="button" class="btn" data-c="granted">Accept</button><button type="button" class="btn ghost" data-c="denied">Decline</button></div>';
+      document.body.appendChild(bar);
+      document.body.classList.add("has-consent");
+      bar.addEventListener("click", function (e) {
+        var v = e.target.getAttribute && e.target.getAttribute("data-c");
+        if (!v) return;
+        C.set(v);
+        close();
+        toast(v === "granted" ? "Thanks. Analytics cookies are on" : "Analytics cookies are off");
+      });
+    }
+    $$("[data-action=cookies]").forEach(function (b) { b.addEventListener("click", function (e) { e.preventDefault(); show(); }); });
+    if (C.needsPrompt()) show();
+  }
+
   /* ---------- go ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
@@ -732,6 +764,7 @@
     initLens();
     initContact();
     initSharedBar();
+    initConsent();
     $$("details.case").forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });
     });

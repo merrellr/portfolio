@@ -57,6 +57,12 @@ If the script can't be reached, the form offers a pre-filled email instead.
 
 ## Analytics and sharing
 
+- **Cookie consent:** `assets/js/consent.js` loads just before the Google Analytics snippet and sets Google Consent
+  Mode v2 defaults, the same rules as www.productadvisory.co: analytics cookies are off until Accept for visitors in
+  the EEA, UK and Switzerland (Google applies this by IP) and on elsewhere; advertising storage is always denied, and
+  Do Not Track or Global Privacy Control keep cookies off. A banner (`site.js`) appears only when there is no saved
+  choice and the device time zone is in Europe. Accept or Decline is saved in `localStorage` (`pa_consent`) and never
+  asked again; **Cookie settings** in the footer reopens it. New pages need the `consent.js` tag above the GA snippet.
 - **Google Analytics 4** (`G-62QKHPVHCM`) is in the `<head>` of every page. Besides page views, outbound
   links and PDF opens, which GA records automatically, `site.js` sends these events: `ask_question`, `ask_answer`
   (outcome), `case_study_open` (case_id), `filter` (list, filter), `command_menu_open` and `copy_email`.
