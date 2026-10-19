@@ -15,6 +15,11 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
 | One-page summary for printing | `one-pager.html` (fits one US Letter page; QR code in `assets/img/qr.svg`) |
 | Old Google Sites links (`/home`, `/resume`, `/portfolio`, `/blog`) | `404.html` redirects them |
 
+Pages are files (`work.html`), but every link, canonical tag and the sitemap use the clean address (`/work`, and `/`
+for the home page); GitHub Pages serves `work.html` for `/work`. Old `.html` links still work, and `prefs.js` shows
+them as the clean address. Inside `site.js` pages are still known by file name (the Ask script accepts sources such
+as `work.html#id`), and `clean()` turns those into links.
+
 ## How things work
 
 - **Styles:** `assets/css/site.css`. Colours are tokens at the top of the file, and dark mode redefines them.

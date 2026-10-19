@@ -11,6 +11,15 @@
    ================================================================ */
 (function () {
   "use strict";
+  // Clean addresses: an old link to /work.html (or /index.html) shows as /work (or /), same page, no reload.
+  // GitHub Pages serves work.html for /work.
+  try {
+    var path = location.pathname;
+    if (history.replaceState && /\.html$/.test(path) && !/\/404\.html$/.test(path)) {
+      history.replaceState(history.state, "", path.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "") + location.search + location.hash);
+    }
+  } catch (e) { /* the page works the same either way */ }
+
   var DEFAULTS = { style: "editorial", accent: "", text: "m", density: "comfortable", motion: "full", lens: "" };
   var CHOICES = {
     style: ["editorial", "boardroom", "lab"],

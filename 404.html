@@ -11,7 +11,7 @@
 <script>
   // Old Google Sites paths (/home, /resume, /portfolio, /blog) → new pages
   (function () {
-    var map = { "/home": "/", "/resume": "/resume.html", "/portfolio": "/work.html", "/blog": "/writing.html" };
+    var map = { "/home": "/", "/portfolio": "/work", "/blog": "/writing" };
     var p = location.pathname.replace(/\/+$/, "");
     if (map[p]) location.replace(map[p]);
   })();
@@ -30,7 +30,7 @@
 <main class="wrap page-head">
   <div class="eyebrow">404</div>
   <h1>That page moved.</h1>
-  <p>The site has a new home. Try the <a href="/">home page</a>, <a href="/work.html">work</a> or <a href="/resume.html">resume</a>.</p>
+  <p>The site has a new home. Try the <a href="/">home page</a>, <a href="/work">work</a> or <a href="/resume">resume</a>.</p>
 </main>
 </body>
 </html>

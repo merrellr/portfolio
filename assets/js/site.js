@@ -26,10 +26,14 @@
     } catch (e) { return null; }
   }
 
+  // The file name, whether the address is clean (/work) or not (/work.html).
   function currentPage() {
     var p = location.pathname.split("/").pop();
-    return p && p.indexOf(".html") > -1 ? p : "index.html";
+    return !p ? "index.html" : /\.html$/.test(p) ? p : p + ".html";
   }
+  // Pages are known by file name ("work.html#id", which is also what the Ask script accepts as a source);
+  // links show the clean address ("/work#id"). GitHub Pages serves work.html for /work.
+  function clean(u) { return String(u).replace(/^index\.html/, "/").replace(/^([a-z-]+)\.html/, "/$1"); }
 
   /* ---------- analytics ----------
      Google Analytics records page views, outbound links and PDF opens on its
@@ -353,7 +357,7 @@
         if (ASK_ENDPOINT) html += '<div class="ask-answer" aria-busy="true"><span class="ask-ai">AI answer</span><p class="ask-thinking">Reading the sections below…</p></div>';
         html += '<div class="ask-src-label">' + (ASK_ENDPOINT ? "Sources" : "Most relevant sections") + "</div>";
         html += r.results.map(function (d, i) {
-          return '<a class="ask-hit" href="' + d.url + '"><small>' + (ASK_ENDPOINT ? "[" + (i + 1) + "] " : "") + esc(d.kind) + '</small><b>' + esc(d.title) + '</b><p>' + snippet(d.text, r.terms) + '</p></a>';
+          return '<a class="ask-hit" href="' + clean(d.url) + '"><small>' + (ASK_ENDPOINT ? "[" + (i + 1) + "] " : "") + esc(d.kind) + '</small><b>' + esc(d.title) + '</b><p>' + snippet(d.text, r.terms) + '</p></a>';
         }).join("");
         out.innerHTML = html;
         out.scrollTop = 0;
@@ -416,7 +420,7 @@
       para = para.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, function (m, nums) {
         return nums.split(/\s*,\s*/).map(function (n) {
           var d = results[+n - 1];
-          return d ? '<a class="cite" href="' + d.url + '" title="' + esc(d.title) + '">' + n + "</a>" : "";
+          return d ? '<a class="cite" href="' + clean(d.url) + '" title="' + esc(d.title) + '">' + n + "</a>" : "";
         }).join("");
       });
       return "<p>" + para.replace(/\n/g, "<br>") + "</p>";
@@ -441,7 +445,7 @@
       setTimeout(function () { input.focus(); }, 300);
       if (q && box._run) box._run(q);
     } else {
-      location.href = "index.html?ask=" + encodeURIComponent(q || "") + "#ask";
+      location.href = "/?ask=" + encodeURIComponent(q || "") + "#ask";
     }
   }
 
@@ -450,19 +454,19 @@
      ================================================================ */
   var pal, palInput, palList, palItems = [], palSel = 0, lastFocus;
   var ACTIONS = [
-    { g: "Go to", t: "Home", i: "⌂", run: function () { location.href = "index.html"; } },
-    { g: "Go to", t: "Work: case studies", i: "◆", run: function () { location.href = "work.html"; } },
-    { g: "Go to", t: "Resume", i: "≡", run: function () { location.href = "resume.html"; } },
-    { g: "Go to", t: "Writing & frameworks", i: "✎", run: function () { location.href = "writing.html"; } },
+    { g: "Go to", t: "Home", i: "⌂", run: function () { location.href = "/"; } },
+    { g: "Go to", t: "Work: case studies", i: "◆", run: function () { location.href = "/work"; } },
+    { g: "Go to", t: "Resume", i: "≡", run: function () { location.href = "/resume"; } },
+    { g: "Go to", t: "Writing & frameworks", i: "✎", run: function () { location.href = "/writing"; } },
     { g: "Do", t: "Copy email address", i: "@", hint: EMAIL, run: copyEmail },
     { g: "Do", t: "Open resume (PDF)", i: "↗", run: function () { window.open("assets/Robert-Merrell-Resume.pdf", "_blank", "noopener"); } },
     { g: "Do", t: "Try the PM + AI skill assessment", i: "↗", hint: "assessment.productadvisory.co", run: function () { window.open("https://assessment.productadvisory.co/", "_blank", "noopener"); } },
     { g: "Do", t: "Open LinkedIn", i: "in", run: function () { window.open("https://www.linkedin.com/in/robertmerrell/", "_blank", "noopener"); } },
     { g: "Do", t: "Subscribe to the Product+ newsletter", i: "+", run: function () { window.open("https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7391081463410196482", "_blank", "noopener"); } },
     { g: "Do", t: "Toggle light / dark", i: "◐", run: toggleTheme },
-    { g: "Do", t: "Send Robert a message", i: "✉", run: function () { location.href = "contact.html"; } },
-    { g: "Make it yours", t: "Open all preferences", i: "⚙", run: function () { location.href = "preferences.html"; } },
-    { g: "Do", t: "Print the one-pager", i: "⎙", run: function () { location.href = "one-pager.html"; } },
+    { g: "Do", t: "Send Robert a message", i: "✉", run: function () { location.href = "/contact"; } },
+    { g: "Make it yours", t: "Open all preferences", i: "⚙", run: function () { location.href = "/preferences"; } },
+    { g: "Do", t: "Print the one-pager", i: "⎙", run: function () { location.href = "/one-pager"; } },
     { g: "Make it yours", t: "Style: Editorial", i: "Aa", run: function () { setPref("style", "editorial"); } },
     { g: "Make it yours", t: "Style: Boardroom", i: "Aa", run: function () { setPref("style", "boardroom"); } },
     { g: "Make it yours", t: "Style: Lab", i: "Aa", run: function () { setPref("style", "lab"); } }
@@ -489,7 +493,7 @@
   function caseItems() {
     if (!index) return [];
     return index.docs.filter(function (d) { return d.kind !== "Home" && /#/.test(d.url) && (d.kind === "Case study" || d.kind === "Experience"); })
-      .map(function (d) { return { g: d.kind === "Experience" ? "Experience" : "Case studies", t: d.title, s: d.text.slice(0, 200), i: d.kind === "Experience" ? "▸" : "◆", run: function () { location.href = d.url; if (currentPage() === d.url.split("#")[0]) { location.hash = ""; location.hash = d.url.split("#")[1]; openHash(); } } }; });
+      .map(function (d) { return { g: d.kind === "Experience" ? "Experience" : "Case studies", t: d.title, s: d.text.slice(0, 200), i: d.kind === "Experience" ? "▸" : "◆", run: function () { location.href = clean(d.url); if (currentPage() === d.url.split("#")[0]) { location.hash = ""; location.hash = d.url.split("#")[1]; openHash(); } } }; });
   }
   function renderPalette() {
     var q = palInput.value.trim().toLowerCase();
@@ -682,7 +686,7 @@
           track("contact_submit", { reason: d.reason });
           form.innerHTML = '<div class="sent"><h3>Thanks' + (d.name ? ", " + esc(d.name.split(" ")[0]) : "") + '.</h3><p>' +
             (d.reason === "feedback" ? "Your feedback is on its way to me. It helps make this site better." : "Your message is on its way to my inbox, and I'll reply to " + esc(d.email) + ". You'll also get a short confirmation by email.") +
-            '</p><a class="btn ghost" href="index.html">Back to the home page</a></div>';
+            '</p><a class="btn ghost" href="/">Back to the home page</a></div>';
         })
         .catch(function () {
           btn.disabled = false;
@@ -735,7 +739,7 @@
       var cur = C.choice();
       bar = document.createElement("div");
       bar.className = "consent"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Cookies and analytics");
-      bar.innerHTML = '<div class="consent-text"><b>Cookies and analytics</b><p>I use Google Analytics to see which pages are used, so I can improve this site. It sets cookies on your device. It isn\'t used for advertising. <a href="https://www.productadvisory.co/privacy-policy.html#cookies" target="_blank" rel="noopener">Privacy Policy</a></p>' +
+      bar.innerHTML = '<div class="consent-text"><b>Cookies and analytics</b><p>I use Google Analytics to see which pages are used, so I can improve this site. It sets cookies on your device. It isn\'t used for advertising. <a href="https://www.productadvisory.co/privacy-policy#cookies" target="_blank" rel="noopener">Privacy Policy</a></p>' +
         (cur ? '<p class="consent-now">Your current choice: ' + (cur === "granted" ? "Accepted" : "Declined") + ".</p>" : "") + "</div>" +
         '<div class="btn-row"><button type="button" class="btn" data-c="granted">Accept</button><button type="button" class="btn ghost" data-c="denied">Decline</button></div>';
       document.body.appendChild(bar);
