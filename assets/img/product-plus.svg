@@ -1,0 +1,8 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+      <rect width="240" height="240" rx="0" fill="#f5f2ec"/>
+      <text x="22" y="150" text-anchor="start" font-family="Fraunces" font-style="italic" font-weight="500" font-size="50" fill="#16181d" letter-spacing="-1.5">Product</text>
+      <rect x="193" y="74" width="14" height="44" rx="4.666666666666667" fill="#16181d"/>
+    <rect x="178" y="89" width="44" height="14" rx="4.666666666666667" fill="#0b7a64"/>
+    <rect x="193" y="89" width="14" height="14" fill="#3fc7a6"/>
+      <rect x="22" y="168" width="196" height="3" fill="#16181d"/>
+    </svg>

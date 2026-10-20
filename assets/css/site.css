@@ -395,9 +395,9 @@ a.cite:hover { border-color: var(--accent); }
 /* ---------- writing ---------- */
 .newsletter { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; padding: 0; overflow: hidden; }
 .newsletter .body { padding: clamp(24px, 4vw, 44px); }
-.newsletter .side { background: var(--ink); color: var(--paper); padding: clamp(24px, 4vw, 44px); display: grid; align-content: center; gap: 6px; }
-.newsletter .side b { font: 500 4rem/1 var(--serif); letter-spacing: -.03em; }
-.newsletter .side span { opacity: .75; }
+.newsletter .side { background: var(--paper-2); padding: clamp(24px, 4vw, 44px); display: grid; place-items: center; border-left: 1px solid var(--line); }
+.newsletter .side img { width: min(220px, 100%); height: auto; border-radius: 22%; box-shadow: var(--shadow); }
+@media (max-width: 760px) { .newsletter .side { border-left: 0; border-top: 1px solid var(--line); } }
 @media (max-width: 760px) { .newsletter { grid-template-columns: 1fr; } }
 .framework img { border-radius: 10px; border: 1px solid var(--line); background: #fff; margin-bottom: 18px; }
 .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 14px; }
