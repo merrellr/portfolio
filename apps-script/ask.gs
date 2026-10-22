@@ -231,29 +231,34 @@ function answerContact_(body) {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "bad_email" };
   if (reason !== "feedback" && !email) return { ok: false, error: "need_email" };
 
-  if (!takeContactQuota_()) return { ok: false, error: "daily_limit" };
+  // A blocked sender is told "sent" (so they stop trying) but nothing is emailed to anyone;
+  // the message is only kept on the sheet, marked "blocked". See BLOCKED_SENDERS below.
+  var blocked = isBlockedSender_(email);
+  if (!blocked && !takeContactQuota_()) return { ok: false, error: "daily_limit" };
 
-  var emailed = "yes";
-  try {
-    var lines = [
-      "Reason: " + CONTACT_REASONS_[reason],
-      "Name: " + (name || "(not given)"),
-      "Email: " + (email || "(not given)"),
-      company ? "Company: " + company : null,
-      rating ? "Site rating: " + rating : null,
-      "",
-      message,
-      "",
-      "Sent from the contact form on portfolio.productadvisory.co"
-    ].filter(function (l) { return l !== null; });
-    var opts = { to: NOTIFY_EMAIL_, subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
-    if (email) opts.replyTo = email;
-    sendMail_(opts);
-  } catch (err) {
-    emailed = "failed: " + String(err && err.message || err).slice(0, 200);
+  var emailed = blocked ? "blocked" : "yes";
+  if (!blocked) {
+    try {
+      var lines = [
+        "Reason: " + CONTACT_REASONS_[reason],
+        "Name: " + (name || "(not given)"),
+        "Email: " + (email || "(not given)"),
+        company ? "Company: " + company : null,
+        rating ? "Site rating: " + rating : null,
+        "",
+        message,
+        "",
+        "Sent from the contact form on portfolio.productadvisory.co"
+      ].filter(function (l) { return l !== null; });
+      var opts = { to: NOTIFY_EMAIL_, subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
+      if (email) opts.replyTo = email;
+      sendMail_(opts);
+    } catch (err) {
+      emailed = "failed: " + String(err && err.message || err).slice(0, 200);
+    }
+
+    if (email) emailed += "; " + sendThanks_(email, name, reason);
   }
-
-  if (email) emailed += "; " + sendThanks_(email, name, reason);
 
   // The sheet keeps every message even if the email fails, with the reason in the last column.
   try {
@@ -265,7 +270,7 @@ function answerContact_(body) {
     }
   } catch (err) { /* the email may still have gone */ }
 
-  return emailed.indexOf("yes") === 0 ? { ok: true } : { ok: true, emailed: false };
+  return blocked || emailed.indexOf("yes") === 0 ? { ok: true } : { ok: true, emailed: false };
 }
 
 /**
@@ -317,6 +322,22 @@ function testContactEmail() {
   try { if (GmailApp.getAliases().indexOf(SENDER_EMAIL_) > -1 || from === SENDER_EMAIL_) from = SENDER_EMAIL_; } catch (e) { /* no Gmail access */ }
   sendMail_({ to: NOTIFY_EMAIL_, subject: "Portfolio contact form: test", body: "If you can read this, the contact form can email you.\n\nThis test was sent from " + from + ".\nRemaining email quota today: " + MailApp.getRemainingDailyQuota() });
   Logger.log("Test email sent to " + NOTIFY_EMAIL_ + " from " + from);
+}
+
+/**
+ * Senders whose contact-form messages are never emailed (no notice to us, no thank-you to them).
+ * List them in the script property BLOCKED_SENDERS (Project Settings → Script properties),
+ * separated by commas or new lines: a full address (someone@example.com) or a whole
+ * domain starting with @ (@example.com). Kept out of the code so no address is published.
+ */
+function isBlockedSender_(email) {
+  var e = String(email || "").toLowerCase().trim();
+  if (!e) return false;
+  var raw = "";
+  try { raw = PropertiesService.getScriptProperties().getProperty("BLOCKED_SENDERS") || ""; } catch (err) { return false; }
+  return raw.toLowerCase().split(/[\s,;]+/).some(function (b) {
+    return b && (b === e || (b.charAt(0) === "@" && e.length > b.length && e.slice(-b.length) === b));
+  });
 }
 
 function takeContactQuota_() {
