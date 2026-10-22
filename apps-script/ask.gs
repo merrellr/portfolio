@@ -176,7 +176,7 @@ function logQuestion_(q, sources, outcome) {
     if (!ss) return;
     var sheet = ss.getSheetByName("Questions") || ss.insertSheet("Questions");
     if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Question", "Sections used", "Outcome"]);
-    sheet.appendRow([new Date(), q, sources.map(function (s) { return s.title; }).join(" · "), outcome]);
+    sheet.appendRow([new Date(), q, sources.map(function (s) { return s.title; }).join(" · "), outcome].map(safeCell_));
   } catch (err) { /* logging must never break an answer */ }
 }
 
@@ -266,7 +266,7 @@ function answerContact_(body) {
     if (ss) {
       var sheet = ss.getSheetByName("Messages") || ss.insertSheet("Messages");
       if (sheet.getLastRow() === 0) sheet.appendRow(["Time", "Reason", "Name", "Email", "Company", "Rating", "Message", "Emailed"]);
-      sheet.appendRow([new Date(), CONTACT_REASONS_[reason], name, email, company, rating, message, emailed]);
+      sheet.appendRow([new Date(), CONTACT_REASONS_[reason], name, email, company, rating, message, emailed].map(safeCell_));
     }
   } catch (err) { /* the email may still have gone */ }
 
@@ -357,4 +357,11 @@ function takeContactQuota_() {
   } finally {
     if (locked) lock.releaseLock();
   }
+}
+
+// A sheet cell that starts with = + - @ would run as a formula when the sheet is opened, and the
+// questions and messages here come from strangers, so such text is stored with a leading ' (as text).
+function safeCell_(v) {
+  if (typeof v !== "string") return v;
+  return /^[=+\-@\t\r]/.test(v) && !/^[+-]?[\d\s().-]+$/.test(v) ? "'" + v : v;
 }
