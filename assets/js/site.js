@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  var EMAIL = "merrell.robert.j@gmail.com";
+  var EMAIL = "rmerrell@productadvisory.co";
   // The Google Apps Script web app that writes AI answers (apps-script/ask.gs).
   // Leave empty and Ask still works as a plain search over the site.
   var ASK_ENDPOINT = "https://script.google.com/macros/s/AKfycbw0SMcHWjT62aqcawib5YH0sORZYhM8C8hvez2p5m4OfHMUqpdifdst_7T3iN_oajtNLA/exec";

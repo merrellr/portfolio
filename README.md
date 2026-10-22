@@ -61,8 +61,10 @@ Make it yours has a **Share this look** button, and each AI answer has **Copy a 
 ## Contact form
 
 `contact.html` posts `{type: "contact", …}` to the same Apps Script web app as Ask (`ASK_ENDPOINT`). The script
-saves the message to the **Messages** tab and emails it to the account that owns the script, with Reply-To set to
-the sender. Spam protection: a hidden honeypot field, a three-second minimum before sending, and 25 messages a day.
+saves the message to the **Messages** tab and emails it to rmerrell@productadvisory.co (`NOTIFY_EMAIL_`), with
+Reply-To set to the sender. Emails go out from rmerrell@ (`SENDER_EMAIL_`) when the account that owns the script has
+it as a "Send mail as" address; otherwise from that account's own address, with Reply-To rmerrell@. Run
+`testContactEmail` after any change: its log says which address it sent from. Spam protection: a hidden honeypot field, a three-second minimum before sending, and 25 messages a day.
 If the script can't be reached, the form offers a pre-filled email instead.
 
 ## Analytics and sharing

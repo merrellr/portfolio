@@ -183,7 +183,30 @@ function logQuestion_(q, sources, outcome) {
 /* ================= Contact form ================= */
 
 // Where contact-form messages are delivered.
-var NOTIFY_EMAIL_ = "merrell.robert.j@gmail.com";
+var NOTIFY_EMAIL_ = "rmerrell@productadvisory.co";
+// The address emails are sent from. Apps Script sends as the Google account that
+// owns this script; if that account has rmerrell@ as a "Send mail as" address (Gmail →
+// Settings → Accounts → Send mail as, or a Workspace alias), emails go out from
+// rmerrell@. Otherwise they come from the owner's own address, with Reply-To set to rmerrell@.
+var SENDER_EMAIL_ = "rmerrell@productadvisory.co";
+var SENDER_NAME_ = "Robert Merrell";
+
+/** Sends from SENDER_EMAIL_ when the account can, otherwise from the account itself. */
+function sendMail_(o) {
+  var opts = { name: o.name || SENDER_NAME_ };
+  if (o.replyTo) opts.replyTo = o.replyTo;
+  if (o.htmlBody) opts.htmlBody = o.htmlBody;
+  var canSendAs = false;
+  try { canSendAs = GmailApp.getAliases().indexOf(SENDER_EMAIL_) > -1 || Session.getEffectiveUser().getEmail() === SENDER_EMAIL_; } catch (e) { /* no Gmail access */ }
+  if (canSendAs) {
+    if (Session.getEffectiveUser().getEmail() !== SENDER_EMAIL_) opts.from = SENDER_EMAIL_;
+    GmailApp.sendEmail(o.to, o.subject, o.body, opts);
+  } else {
+    opts.to = o.to; opts.subject = o.subject; opts.body = o.body;
+    if (!opts.replyTo) opts.replyTo = SENDER_EMAIL_;
+    MailApp.sendEmail(opts);
+  }
+}
 var CONTACT_DAILY_LIMIT_ = 25;
 var CONTACT_REASONS_ = {
   hiring: "Hiring for a role",
@@ -225,7 +248,7 @@ function answerContact_(body) {
     ].filter(function (l) { return l !== null; });
     var opts = { to: NOTIFY_EMAIL_, subject: "Portfolio: " + CONTACT_REASONS_[reason] + (name ? " from " + name : ""), body: lines.join("\n") };
     if (email) opts.replyTo = email;
-    MailApp.sendEmail(opts);
+    sendMail_(opts);
   } catch (err) {
     emailed = "failed: " + String(err && err.message || err).slice(0, 200);
   }
@@ -276,7 +299,7 @@ function sendThanks_(email, name, reason) {
       "<a href=\"" + linkedin + "\">connect with me on LinkedIn</a>.</p>" +
       "<p>Best,<br>Robert Merrell<br><a href=\"" + site + "\">portfolio.productadvisory.co</a></p>";
 
-    MailApp.sendEmail({ to: email, subject: "Thanks for reaching out", body: text, htmlBody: html, name: "Robert Merrell", replyTo: NOTIFY_EMAIL_ });
+    sendMail_({ to: email, subject: "Thanks for reaching out", body: text, htmlBody: html, name: "Robert Merrell", replyTo: NOTIFY_EMAIL_ });
     props.setProperty(key, "1");
     return "thank-you sent";
   } catch (err) {
@@ -290,8 +313,10 @@ function sendThanks_(email, name, reason) {
  * NOTIFY_EMAIL_. Check that inbox (and spam) before deploying.
  */
 function testContactEmail() {
-  MailApp.sendEmail(NOTIFY_EMAIL_, "Portfolio contact form: test", "If you can read this, the contact form can email you.\n\nRemaining email quota today: " + MailApp.getRemainingDailyQuota());
-  Logger.log("Test email sent to " + NOTIFY_EMAIL_);
+  var from = Session.getEffectiveUser().getEmail();
+  try { if (GmailApp.getAliases().indexOf(SENDER_EMAIL_) > -1 || from === SENDER_EMAIL_) from = SENDER_EMAIL_; } catch (e) { /* no Gmail access */ }
+  sendMail_({ to: NOTIFY_EMAIL_, subject: "Portfolio contact form: test", body: "If you can read this, the contact form can email you.\n\nThis test was sent from " + from + ".\nRemaining email quota today: " + MailApp.getRemainingDailyQuota() });
+  Logger.log("Test email sent to " + NOTIFY_EMAIL_ + " from " + from);
 }
 
 function takeContactQuota_() {
