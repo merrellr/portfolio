@@ -12,7 +12,7 @@
   var EMAIL = "rmerrell@productadvisory.co";
   // The Google Apps Script web app that writes AI answers (apps-script/ask.gs).
   // Leave empty and Ask still works as a plain search over the site.
-  var ASK_ENDPOINT = "https://script.google.com/macros/s/AKfycbw0SMcHWjT62aqcawib5YH0sORZYhM8C8hvez2p5m4OfHMUqpdifdst_7T3iN_oajtNLA/exec";
+  var ASK_ENDPOINT = "https://script.google.com/macros/s/AKfycbzBAlOzWixhLKyIbUmMriXhLyhffOskOEdu3dpvYV0k3dMUholkhPdejv7HHaz8yUP2/exec";
   var PAGES = ["index.html", "work.html", "resume.html", "writing.html"];
   var PAGE_NAMES = { "index.html": "Home", "work.html": "Work", "resume.html": "Resume", "writing.html": "Writing" };
 
