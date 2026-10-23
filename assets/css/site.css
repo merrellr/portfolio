@@ -959,3 +959,17 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .pick b { display: block; font-size: .9875rem; }
 .pick small { display: flex; align-items: center; font: 500 .6875rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-top: 2px; }
 .pick p { margin: 6px 0 0; font-size: .9375rem; color: var(--ink-2); }
+
+/* ---------- Work: partner programs inside a case study ---------- */
+.partner-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.partner-row span { font: 600 .8125rem var(--sans); padding: 4px 10px; border-radius: 999px; background: var(--paper-2); border: 1px solid var(--line); color: var(--ink); }
+.programs { grid-column: 1 / -1; border-top: 1px dashed var(--line); padding-top: 20px; }
+.program-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.program { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; padding: 14px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); }
+.program-ic { width: 52px; height: 49px; padding: 6px; border-radius: 10px; box-sizing: border-box; background: var(--accent-soft); color: var(--accent);
+  stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.program-ic .fill { fill: currentColor; stroke: none; }
+.program-area { font: 500 .6875rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.program b { display: block; font-size: 1rem; margin-top: 2px; }
+.program-product { display: block; font-size: .875rem; color: var(--accent); font-weight: 600; }
+.program p { margin: 6px 0 0; font-size: .875rem !important; }
