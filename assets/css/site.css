@@ -973,3 +973,21 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .program b { display: block; font-size: 1rem; margin-top: 2px; }
 .program-product { display: block; font-size: .875rem; color: var(--accent); font-weight: 600; }
 .program p { margin: 6px 0 0; font-size: .875rem !important; }
+.program-k { font-weight: 600; color: var(--ink); }
+.program-flow { list-style: none; padding: 0; margin: 0 0 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; counter-reset: pf; }
+.program-flow li { position: relative; margin: 0; padding: 12px 22px 12px 14px; background: var(--card); border: 1px solid var(--line); border-right: 0; }
+.program-flow li:first-child { border-radius: 12px 0 0 12px; }
+.program-flow li:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--line); }
+.program-flow li:not(:last-child)::after { content: "→"; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.program-flow li::before { counter-increment: pf; content: counter(pf); display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; margin-right: 6px;
+  background: var(--accent-soft); color: var(--accent); font: 700 .6875rem var(--sans); vertical-align: 1px; }
+.program-flow li.up { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.program-flow li.up::before { content: "↑"; background: var(--accent); color: var(--accent-ink); }
+.program-flow b { font-size: .9375rem; }
+.program-flow span { display: block; font-size: .8125rem; color: var(--ink-2); margin-top: 3px; }
+@media (max-width: 760px) {
+  .program-flow { grid-template-columns: 1fr; }
+  .program-flow li, .program-flow li:first-child, .program-flow li:last-child { border-radius: 0; border-right: 1px solid var(--line); border-bottom: 0; }
+  .program-flow li:first-child { border-radius: 12px 12px 0 0; } .program-flow li:last-child { border-radius: 0 0 12px 12px; border-bottom: 1px solid var(--line); }
+  .program-flow li:not(:last-child)::after { content: "↓"; }
+}
