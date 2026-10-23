@@ -642,6 +642,74 @@
       $("[name=message]", form).placeholder = fb ? "What worked, what didn't, what you'd add…" :
         r === "hiring" ? "The role, the team, and the best way to reach you…" :
         r === "advisory" ? "What you're building and where you're stuck…" : "";
+      setupAssist(r);
+    }
+
+    /* ----- "Not sure what to write?": a few quick questions, turned into a draft by AI ----- */
+    var assist = $("#contact-assist", form);
+    var ASSIST_COPY = {
+      hiring: ["What's the role?", "For example: VP of Product for a care-coordination platform, team of 12", "What would the role focus on?"],
+      advisory: ["What are you working on?", "For example: launching an AI feature for clinicians next quarter", "Where could I help?"],
+      other: ["What's on your mind?", "For example: I'd love to have you on our product podcast", "What's it about?"]
+    };
+    function assistKind() { return reason === "hiring" || reason === "advisory" ? reason : "other"; }
+    function setupAssist(r) {
+      if (!assist) return;
+      assist.hidden = r === "feedback";
+      var k = assistKind(), copy = ASSIST_COPY[k];
+      $("#a-context-label", assist).textContent = copy[0];
+      $("#a-context", assist).placeholder = copy[1];
+      $("#a-help-label", assist).textContent = copy[2];
+      $$("[data-assist-help]", assist).forEach(function (row) { row.hidden = row.getAttribute("data-assist-help") !== k; });
+      $("#a-timing-q", assist).hidden = k === "other";
+    }
+    function assistAnswers() {
+      var k = assistKind();
+      var t = $('[data-assist="timing"] [aria-checked="true"]', assist);
+      return {
+        reason: k,
+        context: $("#a-context", assist).value.trim(),
+        help: $$('[data-assist-help="' + k + '"] [aria-pressed="true"]', assist).map(function (b) { return b.getAttribute("data-value"); }),
+        timing: k !== "other" && t ? t.getAttribute("data-value") : "",
+        extra: $("#a-extra", assist).value.trim()
+      };
+    }
+    // Without the AI (or if it's busy), the answers are written out plainly instead.
+    function plainDraft(a) {
+      var list = a.help.map(function (h) { return h.replace(/^([A-Z])(?![A-Z])/, function (c) { return c.toLowerCase(); }); })
+        .join(", ").replace(/, ([^,]*)$/, " and $1");
+      var when = { exploring: "We're just exploring for now.", months: "We're hoping to move in the next few months.", soon: "We'd like to move as soon as possible." }[a.timing] || "";
+      var lines = a.reason === "hiring" ? [a.context && "I'm reaching out about a role: " + a.context + ".", list && "It would focus on " + list + ".", when]
+        : a.reason === "advisory" ? [a.context && "I'd value your help with " + a.context + ".", list && "The areas I have in mind: " + list + ".", when]
+        : [a.context && a.context + ".", list && "It's about " + list + "."];
+      return lines.concat(a.extra).filter(Boolean).join(" ").replace(/\.\./g, ".");
+    }
+    if (assist) {
+      $$(".chip", assist).forEach(function (c) {
+        c.addEventListener("click", function () { c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") === "true" ? "false" : "true"); });
+      });
+      var timings = $$('[data-assist="timing"] [role=radio]', assist);
+      timings.forEach(function (b) {
+        b.addEventListener("click", function () { timings.forEach(function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); }); });
+      });
+      $("#a-write", assist).addEventListener("click", function () {
+        var btn = this, a = assistAnswers(), out = $(".assist-status", assist), msg = $("[name=message]", form);
+        if (!a.context && !a.help.length && !a.extra) { out.textContent = "Answer at least one question first."; return; }
+        btn.disabled = true; out.textContent = "Writing your message…";
+        var fill = function (text, ai) {
+          msg.value = text.slice(0, 4000);
+          btn.disabled = false;
+          out.textContent = ai ? "Done. Your message is in the box above: edit anything you like." : "Your answers are in the box above: edit anything you like.";
+          msg.focus();
+          track("contact_draft", { ai: ai ? "yes" : "no", reason: a.reason });
+        };
+        if (!ASK_ENDPOINT) return fill(plainDraft(a), false);
+        fetch(ASK_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ type: "draft", reason: a.reason, context: a.context, help: a.help, timing: a.timing, extra: a.extra, company: $("[name=company]", form).value.trim(), cid: visitorId() }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) { if (r && r.ok && r.text) fill(r.text, true); else fill(plainDraft(a), false); })
+          .catch(function () { fill(plainDraft(a), false); });
+      });
     }
     reasons.forEach(function (b) { b.addEventListener("click", function () { pickReason(b.getAttribute("data-reason")); }); });
     ratings.forEach(function (b) {
