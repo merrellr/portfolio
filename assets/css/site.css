@@ -1023,3 +1023,26 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .fw-ico .dot { fill: var(--accent); stroke: var(--accent); }
 .fw-ico .tick { stroke: var(--accent); }
 .grid.framework:has(> .fw-card) { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+/* Work: app preview tiles and toolkits */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.case > summary:has(.case-thumb) { grid-template-columns: 1fr 220px auto; align-items: center; }
+.case-thumb { width: 220px; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+@media (max-width: 720px) { .case > summary:has(.case-thumb) { grid-template-columns: 1fr auto; } .case-thumb { display: none; } }
+.app-shots { grid-column: 1 / -1; border-top: 1px dashed var(--line); padding-top: 20px; }
+.shot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 40%), 1fr)); gap: 14px; }
+.shot { display: block; color: inherit; text-decoration: none; }
+.shot img, .tool-shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 10px; border: 1px solid var(--line); background: #fff; transition: transform .2s, box-shadow .2s; }
+.shot:hover img, .tool-shot:hover img { transform: translateY(-2px); box-shadow: 0 8px 24px rgb(0 0 0 / .12); }
+.shot span:not(.sr-only) { display: block; margin-top: 8px; font-size: 0.875rem; color: var(--ink-2); line-height: 1.4; }
+.shot b { display: block; color: var(--ink); font-weight: 600; }
+.shots-note { margin: 12px 0 0; font-size: 0.8125rem; color: var(--muted); }
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.tool-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; scroll-margin-top: 88px; }
+.tool-card .tool-shot img { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+.tool-card .tool-shot:hover img { transform: none; box-shadow: none; }
+.tool-text { padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.tool-text h3 { font-size: 1.1875rem; margin: 0; }
+.tool-text p { margin: 0 0 10px; color: var(--ink-2); font-size: 0.9688rem; }
+.tool-text .btn { margin-top: auto; align-self: flex-start; }
+@media (prefers-reduced-motion: reduce) { .shot img, .tool-shot img { transition: none; } }
