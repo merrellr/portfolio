@@ -991,3 +991,27 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
   .program-flow li:first-child { border-radius: 12px 12px 0 0; } .program-flow li:last-child { border-radius: 0 0 12px 12px; border-bottom: 1px solid var(--line); }
   .program-flow li:not(:last-child)::after { content: "↓"; }
 }
+
+/* Article previews take their colours from each article's LinkedIn cover, not from the topic.
+   The topic colour stays on the label dot and the filter chips. Like images, these palettes
+   are fixed and don't change with the site's style or colour mode. */
+.card.art { border-top: 1px solid var(--line); }
+:root[data-style="boardroom"] .card.art { border-top: 3px solid var(--ink); }
+.art-thumb { color: var(--c1); background: var(--bg); }
+.art-thumb .k { stroke: var(--k); stroke-opacity: .7; }
+.art-thumb rect.k:not([fill]) { fill: var(--k); fill-opacity: .35; }
+.art-thumb .b { fill: var(--k); fill-opacity: .3; }
+.art-thumb .so { fill: color-mix(in srgb, var(--c2) 22%, transparent); }
+#art-stop-enabling .art-thumb { --bg: linear-gradient(160deg, #eeecfb, #e9eef8 45%, #e2f3ec); --c1: #2f8d6e; --k: #7a3a1c; }
+#art-stop-enabling .art-thumb .s { fill: rgba(63, 199, 166, .38); }
+#art-day-in-the-life .art-thumb { --bg: #f5f3ee; --c1: #2a9d8f; --c2: #d4691f; --k: #9a958b; }
+#art-ai-agents-learn .art-thumb, #art-roadmaps-rituals .art-thumb { --bg: radial-gradient(90% 120% at 85% 15%, #13322b, #16181d 65%); --c1: #3fc7a6; --k: #f5f2ec; }
+#art-pm-copilots .art-thumb { --bg: #f5f2ec; --c1: #0b7a64; --k: #16181d; }
+#art-feature-fallacy .art-thumb { --bg: #f5f2ec; --c1: #d9531e; --k: #16181d; }
+#art-beyond-automation .art-thumb, #art-150-hot-dog .art-thumb { --bg: #0b7a64; --c1: #f5f2ec; --k: #16181d; }
+#art-150-hot-dog .art-thumb .s { fill: rgba(245, 242, 236, .92); }
+#art-150-hot-dog .art-thumb .f { fill: #16181d; }
+#art-150-hot-dog .art-thumb rect.k:not([fill]) { fill: #0b7a64; fill-opacity: .6; }
+#art-100-staircase .art-thumb { --bg: #fffdf9; --c1: #0b7a64; --k: #16181d; }
+#art-150-hot-dog .art-thumb .bun { fill: #e9b949; }
+#art-150-hot-dog .art-thumb .dog { fill: #d9531e; }
