@@ -893,3 +893,69 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .assist-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .assist-status { margin: 0; font-size: .875rem; color: var(--muted); }
 .assist-note { margin: -6px 0 0; font-size: .8125rem; color: var(--muted); }
+
+/* ================================================================
+   Writing: colour-coded topics, illustrated article cards, finder
+   Topic colours are the validated categorical slots (green, magenta,
+   blue, yellow), stepped for dark mode. Text never wears them: each
+   topic always shows its name beside the colour.
+   ================================================================ */
+:root { --t-ai: #008300; --t-enable: #e87ba4; --t-strategy: #2a78d6; --t-pricing: #eda100; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --t-ai: #008300; --t-enable: #d55181; --t-strategy: #3987e5; --t-pricing: #c98500; }
+}
+:root[data-theme="dark"] { --t-ai: #008300; --t-enable: #d55181; --t-strategy: #3987e5; --t-pricing: #c98500; }
+[data-cat="ai"] { --cat: var(--t-ai); }
+[data-cat="enable"] { --cat: var(--t-enable); }
+[data-cat="strategy"] { --cat: var(--t-strategy); }
+[data-cat="pricing"] { --cat: var(--t-pricing); }
+
+.topic-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--cat, var(--muted)); margin-right: 7px; vertical-align: 1px; flex: none; }
+.topic-chips .chip[data-cat] { border-color: color-mix(in srgb, var(--cat) 45%, var(--line)); }
+.topic-chips .chip[data-cat][aria-pressed="true"] { background: color-mix(in srgb, var(--cat) 16%, var(--card)); color: var(--ink); border-color: var(--cat); box-shadow: inset 0 0 0 1px var(--cat); }
+
+/* article cards */
+.card.art { padding: 0; overflow: hidden; display: flex; flex-direction: column; border-top: 3px solid var(--cat); }
+:root[data-style="boardroom"] .card.art { border-top: 3px solid var(--cat); }
+.art-thumb { height: 140px; color: var(--cat); border-bottom: 1px solid var(--line);
+  background: radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--cat) 16%, var(--card)), color-mix(in srgb, var(--cat) 5%, var(--card)) 70%); }
+.art-thumb svg { width: 100%; height: 100%; display: block; }
+.art-thumb .k { stroke: var(--ink); stroke-opacity: .55; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.art-thumb .k.w { stroke-width: 3.5; } .art-thumb .k.l { stroke-width: 1.5; } .art-thumb .k.d { stroke-dasharray: 5 6; stroke-opacity: .35; }
+.art-thumb rect.k[fill="none"], .art-thumb circle.k[fill="none"] { fill: none; }
+.art-thumb rect.k:not([fill]) { fill: var(--ink); fill-opacity: .25; stroke: none; }
+.art-thumb .a { stroke: currentColor; stroke-width: 2; stroke-linecap: round; } .art-thumb .a.w { stroke-width: 4; } .art-thumb .a.l { stroke-width: 2.5; }
+.art-thumb .s { fill: color-mix(in srgb, currentColor 28%, transparent); }
+.art-thumb .f { fill: currentColor; }
+.art-thumb .b { fill: var(--ink); fill-opacity: .18; }
+.art-body { position: relative; padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.card.art .meta { margin: 0; display: flex; align-items: center; }
+.card.art h3 { margin: 0; font-size: 1.125rem; }
+.art-desc { margin: 0; font-size: .9375rem; color: var(--ink-2); }
+.art-read { margin-top: auto; padding-top: 6px; font: 600 .8125rem var(--sans); color: var(--ink-2); }
+/* With a mouse, the description slides up over the illustration on hover or keyboard focus. */
+@media (hover: hover) {
+  .art-desc { position: absolute; left: 0; right: 0; bottom: 100%; margin: 0; padding: 18px 20px; min-height: 140px; box-sizing: border-box;
+    display: flex; align-items: center; background: color-mix(in srgb, var(--card) 94%, var(--cat)); border-bottom: 1px solid var(--line);
+    font-size: 1rem; line-height: 1.5; color: var(--ink); opacity: 0; transform: translateY(10px); transition: opacity .2s, transform .25s; pointer-events: none; }
+  .card.art:hover .art-desc, .card.art:focus-visible .art-desc { opacity: 1; transform: none; }
+  .art-read { opacity: .7; } .card.art:hover .art-read { opacity: 1; color: var(--accent); }
+}
+.card.art.picked { box-shadow: 0 0 0 3px var(--cat), var(--shadow); }
+.pick-badge { position: absolute; top: 10px; left: 10px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--ink); color: var(--paper); font: 700 .875rem var(--sans); z-index: 2; }
+.card.art { position: relative; }
+
+/* the finder */
+.finder { padding: 0; overflow: hidden; margin-bottom: 26px; border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent-soft) 35%, var(--card)); box-shadow: none; }
+.finder-head { padding: 16px 18px 4px; font-size: 1rem; }
+.finder .ask-form { border-bottom: 1px solid var(--line); }
+.finder-out:empty { display: none; }
+.finder-out { padding: 4px 16px 16px; display: grid; gap: 10px; }
+.finder-out .ask-q { padding-top: 6px; }
+.pick { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; text-decoration: none; padding: 12px 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--cat); }
+.pick:hover { border-color: var(--cat); color: inherit; }
+.pick .num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--paper); font: 700 .8125rem var(--sans); }
+.pick b { display: block; font-size: .9875rem; }
+.pick small { display: flex; align-items: center; font: 500 .6875rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-top: 2px; }
+.pick p { margin: 6px 0 0; font-size: .9375rem; color: var(--ink-2); }

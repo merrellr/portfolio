@@ -218,6 +218,10 @@
     built: ["build", "building", "built", "developed", "launched", "designed"],
     product: ["products", "portfolio", "platform"],
     written: ["article", "articles", "writing", "newsletter", "linkedin"],
+    price: ["pricing", "upsell", "monetization", "tiers", "revenue"],
+    charge: ["pricing", "monetization", "revenue"],
+    adopt: ["adoption", "enablement", "rollout"],
+    adoption: ["enablement", "rollout", "adopt"],
     write: ["article", "articles", "writing", "newsletter"],
     wrote: ["article", "articles", "writing"],
     article: ["articles", "writing", "newsletter"],
@@ -230,7 +234,8 @@
     return (s.toLowerCase().replace(/[’']/g, "").match(/\$|[a-z0-9][a-z0-9+\-.]*[a-z0-9]|[a-z0-9]/g) || [])
       .filter(function (t) { return !STOPSET[t]; });
   }
-  function stem(t) { return t.length > 4 ? t.replace(/(ing|ed|es|s)$/, "") : t; }
+  // price/pricing/priced → pric, service/services → servic: drop a final e too, so the forms meet
+  function stem(t) { return t.length > 4 ? t.replace(/(ing|ed|es|s|e)$/, "") : t; }
 
   var TAG_WORDS = { ai: "ai ai ml", data: "data analytics", interop: "interoperability emr integration", patient: "patient experience",
     revenue: "revenue growth", built: "built", exec: "executive leadership", startup: "startup", payer: "payer reimbursement" };
@@ -251,7 +256,7 @@
         kind: el.getAttribute("data-kind") || PAGE_NAMES[page],
         url: page + (anchor && anchor.id ? "#" + anchor.id : ""),
         text: text,
-        toks: tokens(title + " " + title + " " + tagWords(el) + " " + text).map(stem)
+        toks: tokens(title + " " + title + " " + tagWords(el) + " " + (el.getAttribute("data-keywords") || "") + " " + text).map(stem)
       };
     });
   }
@@ -282,8 +287,8 @@
     return indexing;
   }
 
-  function search(q) {
-    return buildIndex().then(function (ix) {
+  // BM25-style scores for every indexed block (unfiltered), shared by Ask and the article finder.
+  function scoreDocs(ix, q) {
       var base = tokens(q);
       var terms = {};
       base.forEach(function (t) {
@@ -301,7 +306,14 @@
           if (terms[t] === 1) hits++;
         });
         return { d: d, s: s * (1 + 0.35 * hits) * (KIND_WEIGHT[d.kind] || 1) };
-      }).filter(function (r) { return r.s > 0.6; });
+      });
+      return { scored: scored, terms: Object.keys(terms) };
+  }
+
+  function search(q) {
+    return buildIndex().then(function (ix) {
+      var all = scoreDocs(ix, q), terms = all.terms;
+      var scored = all.scored.filter(function (r) { return r.s > 0.6; });
       scored.sort(function (a, c) { return c.s - a.s; });
       // at most one summary block from the home page, so the answers point at the detail
       // and each section once (the home page repeats some case-study titles)
@@ -313,7 +325,7 @@
         if (homeSeen) return false;
         homeSeen = true; return true;
       });
-      return { results: scored.slice(0, 5).map(function (r) { return r.d; }), terms: Object.keys(terms) };
+      return { results: scored.slice(0, 5).map(function (r) { return r.d; }), terms: terms };
     });
   }
 
@@ -824,6 +836,74 @@
     if (C.needsPrompt()) show();
   }
 
+  /* ================================================================
+     Article finder on the Writing page: "Tell me what you're looking
+     for". Articles are ranked in the browser; when the Apps Script is
+     set, AI picks up to three and says why each fits.
+     ================================================================ */
+  function initFinder() {
+    var box = $("#finder");
+    if (!box) return;
+    var form = $("form", box), input = $("input", form), out = $(".finder-out", box), seq = 0;
+    var cards = $$("#article-list .card.art");
+    function info(id) {
+      var c = document.getElementById(id);
+      return { el: c, url: c.href, cat: c.getAttribute("data-cat"), topic: $(".meta", c).textContent.trim(),
+        title: $("h3", c).textContent.trim(), desc: $(".art-desc", c).textContent.trim() };
+    }
+    function clearPicks() {
+      cards.forEach(function (c) { c.classList.remove("picked"); var b = $(".pick-badge", c); if (b) b.remove(); });
+    }
+    function render(q, picks, ai) {
+      clearPicks();
+      if (!picks.length) {
+        out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div><p class="muted" style="margin:0">Nothing matches that closely. Try different words, or browse the topics below.</p>';
+        return;
+      }
+      out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div>' + picks.map(function (p, i) {
+        var a = info(p.id);
+        a.el.classList.add("picked");
+        a.el.insertAdjacentHTML("afterbegin", '<span class="pick-badge" aria-hidden="true">' + (i + 1) + "</span>");
+        return '<a class="pick" data-cat="' + a.cat + '" href="' + esc(a.url) + '" target="_blank" rel="noopener"><span class="num">' + (i + 1) + "</span><span><b>" + esc(a.title) +
+          '</b><small><i class="topic-dot"></i>' + esc(a.topic) + "</small><p>" + esc(p.why || a.desc) + "</p></span></a>";
+      }).join("") + (ai ? '<p class="ask-fine" style="margin:2px 0 0">Suggested by AI from the article summaries. The numbered cards below are highlighted.</p>' : "");
+    }
+    function rank(q) {
+      return buildIndex().then(function (ix) {
+        var scored = scoreDocs(ix, q).scored.filter(function (r) { return /#art-/.test(r.d.url); });
+        scored.sort(function (a, b) { return b.s - a.s; });
+        var seen = {};
+        return scored.filter(function (r) { var id = r.d.url.split("#")[1]; if (seen[id]) return false; seen[id] = 1; return true; });
+      });
+    }
+    function run(q) {
+      q = q.trim();
+      if (!q) return;
+      input.value = q;
+      var mine = ++seq;
+      track("article_finder", { mode: ASK_ENDPOINT ? "ai" : "search" });
+      rank(q).then(function (ranked) {
+        if (mine !== seq) return;
+        var local = ranked.filter(function (r) { return r.s > 0.6; }).slice(0, 3).map(function (r) { return { id: r.d.url.split("#")[1] }; });
+        if (!ASK_ENDPOINT) return render(q, local, false);
+        out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div><p class="ask-thinking" style="margin:0">Finding the best fit…</p>';
+        var top = ranked.slice(0, 6).map(function (r) { var a = info(r.d.url.split("#")[1]); return { url: r.d.url, title: a.title, text: a.topic + ". " + a.desc }; });
+        fetch(ASK_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ type: "recommend", q: q, cid: visitorId(), sources: top }) })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (mine !== seq) return;
+            if (!res || !res.ok || !Array.isArray(res.picks)) return render(q, local, false);
+            render(q, res.picks.map(function (p) { var t = top[p.n - 1]; return t && { id: t.url.split("#")[1], why: p.why }; }).filter(Boolean), true);
+          })
+          .catch(function () { if (mine === seq) render(q, local, false); });
+      });
+    }
+    form.addEventListener("submit", function (e) { e.preventDefault(); run(input.value); });
+    $$(".ask-suggest button", box).forEach(function (b) { b.addEventListener("click", function () { run(b.textContent); }); });
+    input.addEventListener("focus", function () { buildIndex(); }, { once: true });
+  }
+
   /* ---------- go ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
@@ -835,6 +915,7 @@
     initLens();
     initContact();
     initSharedBar();
+    initFinder();
     initConsent();
     $$("details.case").forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });

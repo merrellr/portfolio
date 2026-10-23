@@ -95,62 +95,126 @@
         <h2>Recent writing</h2>
         <p>On AI agents, AI enablement, product strategy and pricing, published on LinkedIn.</p>
       </div>
-      <div class="chips" data-filter-for="#article-list" role="toolbar" aria-label="Filter articles">
+      <div class="card finder" id="finder">
+        <div class="finder-head"><span class="assist-spark" aria-hidden="true">✦</span> <b>Tell me what you're looking for</b> <span class="muted">and I'll suggest where to start.</span></div>
+        <form class="ask-form finder-form" role="search">
+          <input type="search" placeholder="e.g. Only a few people on my team really use AI" aria-label="What are you looking for?">
+          <button class="btn" type="submit">Suggest</button>
+        </form>
+        <div class="ask-suggest">
+          <button type="button">I'm new to AI agents</button>
+          <button type="button">Getting my whole organization to adopt AI</button>
+          <button type="button">How should we price our product?</button>
+          <button type="button">We ship a lot, but users don't notice</button>
+        </div>
+        <div class="finder-out" aria-live="polite"></div>
+      </div>
+
+      <div class="chips topic-chips" data-filter-for="#article-list" role="toolbar" aria-label="Filter articles">
         <button class="chip" data-filter="all">All</button>
-        <button class="chip" data-filter="ai">AI agents</button>
-        <button class="chip" data-filter="enable">AI enablement</button>
-        <button class="chip" data-filter="strategy">Product strategy</button>
-        <button class="chip" data-filter="pricing">Pricing &amp; business models</button>
+        <button class="chip" data-filter="ai" data-cat="ai"><i class="topic-dot"></i>AI agents</button>
+        <button class="chip" data-filter="enable" data-cat="enable"><i class="topic-dot"></i>AI enablement</button>
+        <button class="chip" data-filter="strategy" data-cat="strategy"><i class="topic-dot"></i>Product strategy</button>
+        <button class="chip" data-filter="pricing" data-cat="pricing"><i class="topic-dot"></i>Pricing &amp; business models</button>
       </div>
       <div class="grid three" id="article-list">
-        <a class="card" href="https://www.linkedin.com/pulse/what-non-technical-product-managers-should-actually-learn-merrell-ywscc" target="_blank" rel="noopener" data-tags="ai" data-ask="Article: What Non-Technical Product Managers Should Actually Learn About AI Agents" data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · AI agents</div>
-          <h3>What Non-Technical Product Managers Should Actually Learn About AI Agents</h3>
+        <a class="card art" id="art-ai-agents-learn" data-cat="ai" href="https://www.linkedin.com/pulse/what-non-technical-product-managers-should-actually-learn-merrell-ywscc" target="_blank" rel="noopener" data-tags="ai" data-ask="Article: What Non-Technical Product Managers Should Actually Learn About AI Agents" data-kind="Article" data-keywords="beginner new basics learn skills non-technical understand fundamentals">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><path class="k l" d="M160 66L78 36M160 66L242 36M160 66L104 108M160 66L216 108" fill="none"/>
+  <circle class="k w" cx="160" cy="58" r="12" fill="none"/><path class="k w" d="M138 92c0-14 10-20 22-20s22 6 22 20" fill="none"/>
+  <rect class="s a" x="62" y="22" width="32" height="28" rx="8"/><rect class="s a" x="226" y="22" width="32" height="28" rx="8"/><rect class="s a" x="88" y="96" width="32" height="28" rx="8"/><rect class="s a" x="200" y="96" width="32" height="28" rx="8"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>AI agents</div>
+            <h3>What Non-Technical Product Managers Should Actually Learn About AI Agents</h3>
+            <p class="art-desc">Which parts of AI agents a non-technical product manager actually needs to understand, and which they can safely skip.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/day-life-product-manager-working-ai-agents-2026-edition-merrell-uwsic" target="_blank" rel="noopener" data-tags="ai" data-ask="Article: A Day in the Life of a Product Manager Working with AI Agents (2026 Edition)" data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · AI agents</div>
-          <h3>A Day in the Life of a Product Manager Working with AI Agents (2026 Edition)</h3>
+        <a class="card art" id="art-day-in-the-life" data-cat="ai" href="https://www.linkedin.com/pulse/day-life-product-manager-working-ai-agents-2026-edition-merrell-uwsic" target="_blank" rel="noopener" data-tags="ai" data-ask="Article: A Day in the Life of a Product Manager Working with AI Agents (2026 Edition)" data-kind="Article" data-keywords="workday routine inbox meetings standup customer call backlog prd judgment future of work">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><line class="k d" x1="40" y1="112" x2="280" y2="112"/><path class="k l" d="M70 112a90 90 0 0 1 180 0" fill="none"/>
+  <path class="s" d="M128 112a32 32 0 0 1 64 0z"/><circle class="f" cx="70.17759444145555" cy="106.34885324236178" r="6"/><circle class="f" cx="74.40491353343619" cy="84.18847050625473" r="6"/><circle class="f" cx="92.49000373325863" cy="52.481932120871335" r="6"/><circle class="f" cx="121.67986375914346" cy="30.565565278058244" r="6"/><circle class="f" cx="174.0791018536208" cy="23.10804934643761" r="6"/><circle class="f" cx="208.2244115481097" cy="36.010486704818646" r="6"/><circle class="f" cx="235.98951329518135" cy="63.77558845189029" r="6"/><circle class="f" cx="249.82240555854446" cy="106.3488532423618" r="6"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>AI agents</div>
+            <h3>A Day in the Life of a Product Manager Working with AI Agents (2026 Edition)</h3>
+            <p class="art-desc">Follow Jordan through a workday where agents do the reading, summarizing and watching, and every real decision still belongs to the PM.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/agentic-ai-internal-product-building-pm-copilots-your-robert-merrell-jlepc" target="_blank" rel="noopener" data-tags="ai enable" data-ask="Article: Agentic AI as an Internal Product: Building PM Copilots for Your Own Organization" data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Agentic AI</div>
-          <h3>Agentic AI as an Internal Product: Building PM Copilots for Your Own Organization</h3>
+        <a class="card art" id="art-pm-copilots" data-cat="ai" href="https://www.linkedin.com/pulse/agentic-ai-internal-product-building-pm-copilots-your-robert-merrell-jlepc" target="_blank" rel="noopener" data-tags="ai enable" data-ask="Article: Agentic AI as an Internal Product: Building PM Copilots for Your Own Organization" data-kind="Article" data-keywords="copilot internal tools build platform organization team copilots enablement">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><path class="k l" d="M160 65H60M160 65H260M160 65L96 24M160 65L224 24M160 65L96 106M160 65L224 106" fill="none"/>
+  <rect class="k" x="44" y="54" width="32" height="22" rx="5" fill="none"/><rect class="k" x="244" y="54" width="32" height="22" rx="5" fill="none"/><rect class="k" x="80" y="12" width="32" height="22" rx="5" fill="none"/><rect class="k" x="208" y="12" width="32" height="22" rx="5" fill="none"/><rect class="k" x="80" y="96" width="32" height="22" rx="5" fill="none"/><rect class="k" x="208" y="96" width="32" height="22" rx="5" fill="none"/>
+  <rect class="s a" x="134" y="40" width="52" height="50" rx="14"/><path class="f" d="M160 52l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Agentic AI</div>
+            <h3>Agentic AI as an Internal Product: Building PM Copilots for Your Own Organization</h3>
+            <p class="art-desc">Treat internal AI like a product: how to build copilots that help your own product managers do their best work.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc" target="_blank" rel="noopener" data-tags="ai strategy" data-ask="Article: From Roadmaps to Rituals: How Agentic AI Is Rewriting the Product Manager&#x27;s Job" data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Agentic AI</div>
-          <h3>From Roadmaps to Rituals: How Agentic AI Is Rewriting the Product Manager's Job</h3>
+        <a class="card art" id="art-roadmaps-rituals" data-cat="ai" href="https://www.linkedin.com/pulse/from-roadmaps-rituals-how-agentic-ai-rewriting-job-merrell-mism-r8pnc" target="_blank" rel="noopener" data-tags="ai strategy" data-ask="Article: From Roadmaps to Rituals: How Agentic AI Is Rewriting the Product Manager&#x27;s Job" data-kind="Article" data-keywords="roadmap planning habits rituals cadence role change future job">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><rect class="k" x="30" y="30" width="70" height="12" rx="6" fill="none"/><rect class="k" x="50" y="58" width="80" height="12" rx="6" fill="none"/><rect class="k" x="70" y="86" width="60" height="12" rx="6" fill="none"/>
+  <path class="k l" d="M148 64h34" fill="none"/><path class="k" d="M176 56l8 8-8 8" fill="none"/>
+  <circle class="a l" cx="242" cy="64" r="40" fill="none" stroke-dasharray="190 70"/><path class="f" d="M276 36l8 18-19-3z"/>
+  <circle class="f" cx="242" cy="24" r="5"/><circle class="f" cx="282" cy="64" r="5"/><circle class="f" cx="242" cy="104" r="5"/><circle class="f" cx="202" cy="64" r="5"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Agentic AI</div>
+            <h3>From Roadmaps to Rituals: How Agentic AI Is Rewriting the Product Manager&#x27;s Job</h3>
+            <p class="art-desc">How agentic AI moves the PM&#x27;s job away from static plans and toward the everyday habits that keep a team learning and aligned.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/stop-enabling-individuals-start-organization-robert-merrell-uoboc" target="_blank" rel="noopener" data-tags="enable ai" data-ask="Article: Stop enabling individuals. Start enabling the organization. — Why AI enablement has to be built for the whole organization, not only its most enthusiastic individuals, if it&#x27;s going to last." data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · AI enablement</div>
-          <h3>Stop enabling individuals. Start enabling the organization.</h3>
-          <p>Why AI enablement has to be built for the whole organization, not only its most enthusiastic individuals, if it's going to last.</p>
+        <a class="card art" id="art-stop-enabling" data-cat="enable" href="https://www.linkedin.com/pulse/stop-enabling-individuals-start-organization-robert-merrell-uoboc" target="_blank" rel="noopener" data-tags="enable ai" data-ask="Article: Stop enabling individuals. Start enabling the organization." data-kind="Article" data-keywords="adoption rollout copilot studio organization change management team scale champions">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><line class="k d" x1="24" y1="104" x2="296" y2="104"/>
+  <path class="k" d="M64 104v-10"/><circle class="s a" cx="64" cy="88" r="6"/>
+  <path class="k" d="M150 104v-42"/><ellipse class="s a" cx="138" cy="70" rx="13" ry="7" transform="rotate(-24 138 70)"/><ellipse class="s a" cx="163" cy="80" rx="13" ry="7" transform="rotate(24 163 80)"/><ellipse class="s a" cx="138" cy="90" rx="13" ry="7" transform="rotate(-24 138 90)"/>
+  <path class="k" d="M150 105q-10 10-20 14M150 105v15M150 105q10 10 20 14" fill="none"/>
+  <path class="k w" d="M246 104V52"/><circle class="s a" cx="230" cy="46" r="20"/><circle class="s a" cx="262" cy="46" r="20"/><circle class="s a" cx="246" cy="32" r="24"/>
+  <path class="k" d="M246 105q-24 10-48 14M246 105q-10 12-26 20M246 105v20M246 105q10 12 26 20M246 105q24 10 48 14" fill="none"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>AI enablement</div>
+            <h3>Stop enabling individuals. Start enabling the organization.</h3>
+            <p class="art-desc">Why AI enablement has to be built for the whole organization, not only its most enthusiastic individuals, if it&#x27;s going to last.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc" target="_blank" rel="noopener" data-tags="strategy" data-ask="Article: The Feature Fallacy — Why shipping more isn&#x27;t helping your users, and what to do instead." data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Product strategy</div>
-          <h3>The Feature Fallacy</h3>
-          <p>Why shipping more isn't helping your users, and what to do instead.</p>
+        <a class="card art" id="art-feature-fallacy" data-cat="strategy" href="https://www.linkedin.com/pulse/feature-fallacy-why-shipping-more-isnt-helping-your-do-merrell-mism-ozcbc" target="_blank" rel="noopener" data-tags="strategy" data-ask="Article: The Feature Fallacy" data-kind="Article" data-keywords="features output outcomes value roadmap prioritization shipping build trap">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><line class="k" x1="30" y1="112" x2="290" y2="112"/><rect class="b" x="40" y="98" width="18" height="14" rx="3"/><rect class="b" x="70" y="88" width="18" height="24" rx="3"/><rect class="b" x="100" y="78" width="18" height="34" rx="3"/><rect class="b" x="130" y="68" width="18" height="44" rx="3"/><rect class="b" x="160" y="58" width="18" height="54" rx="3"/><rect class="b" x="190" y="48" width="18" height="64" rx="3"/><rect class="b" x="220" y="38" width="18" height="74" rx="3"/><rect class="b" x="250" y="28" width="18" height="84" rx="3"/><path class="a w" d="M34 88C90 84 150 86 290 84" fill="none"/><circle class="f" cx="290" cy="84" r="6"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Product strategy</div>
+            <h3>The Feature Fallacy</h3>
+            <p class="art-desc">Why shipping more isn&#x27;t helping your users, and what to do instead.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc" target="_blank" rel="noopener" data-tags="strategy" data-ask="Article: Beyond Automation: Win Customers for Life" data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Customers</div>
-          <h3>Beyond Automation: Win Customers for Life</h3>
+        <a class="card art" id="art-beyond-automation" data-cat="strategy" href="https://www.linkedin.com/pulse/beyond-automation-win-customers-life-robert-merrell-bxltc" target="_blank" rel="noopener" data-tags="strategy" data-ask="Article: Beyond Automation: Win Customers for Life" data-kind="Article" data-keywords="customers loyalty retention experience churn relationship service">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><path class="a w" d="M160 65c-22-30-70-30-70 0s48 30 70 0 70-30 70 0-48 30-70 0z" fill="none"/>
+  <circle class="f" cx="90" cy="65" r="6"/><path class="s" d="M160 50c-5-9-19-7-19 4 0 9 11 16 19 22 8-6 19-13 19-22 0-11-14-13-19-4z"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Customers</div>
+            <h3>Beyond Automation: Win Customers for Life</h3>
+            <p class="art-desc">Automation saves time, but lasting customer loyalty comes from the experiences that still need a human touch.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/100-staircase-robert-merrell-jenef" target="_blank" rel="noopener" data-tags="pricing" data-ask="Article: The $100 Staircase — What Apple&#x27;s pricing teaches product managers about the art of the upsell." data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Pricing</div>
-          <h3>The $100 Staircase</h3>
-          <p>What Apple's pricing teaches product managers about the art of the upsell.</p>
+        <a class="card art" id="art-100-staircase" data-cat="pricing" href="https://www.linkedin.com/pulse/100-staircase-robert-merrell-jenef" target="_blank" rel="noopener" data-tags="pricing" data-ask="Article: The $100 Staircase" data-kind="Article" data-keywords="pricing tiers upsell apple packaging monetization revenue">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><path class="k w" d="M30 112h46V90h46V68h46V46h46V24h46" fill="none"/>
+  <circle class="f" cx="76" cy="90" r="6"/><circle class="f" cx="122" cy="68" r="6"/><circle class="f" cx="168" cy="46" r="6"/><circle class="f" cx="214" cy="24" r="6"/>
+  <path class="a l" d="M40 96L230 12" fill="none" stroke-dasharray="4 6"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Pricing</div>
+            <h3>The $100 Staircase</h3>
+            <p class="art-desc">What Apple&#x27;s pricing teaches product managers about the art of the upsell.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
-        <a class="card" href="https://www.linkedin.com/pulse/150-hot-dog-robert-merrell-r0gbf" target="_blank" rel="noopener" data-tags="pricing" data-ask="Article: The $1.50 Hot Dog — Costco sells memberships, not groceries, and what that teaches product managers about where the money really is." data-kind="Writing">
-          <span class="go">↗</span>
-          <div class="meta">LinkedIn · Business models</div>
-          <h3>The $1.50 Hot Dog</h3>
-          <p>Costco sells memberships, not groceries, and what that teaches product managers about where the money really is.</p>
+        <a class="card art" id="art-150-hot-dog" data-cat="pricing" href="https://www.linkedin.com/pulse/150-hot-dog-robert-merrell-r0gbf" target="_blank" rel="noopener" data-tags="pricing" data-ask="Article: The $1.50 Hot Dog" data-kind="Article" data-keywords="business model membership subscription costco revenue loss leader monetization">
+          <div class="art-thumb" aria-hidden="true"><svg viewBox="0 0 320 130"><rect class="s a" x="84" y="22" width="150" height="90" rx="12"/><rect class="f" x="84" y="42" width="150" height="16"/><rect class="k" x="100" y="78" width="54" height="8" rx="4"/><rect class="k" x="100" y="92" width="34" height="8" rx="4"/>
+  <rect class="b" x="244" y="92" width="48" height="18" rx="9"/><rect class="f" x="240" y="96" width="56" height="9" rx="4.5"/></svg></div>
+          <div class="art-body">
+            <div class="meta"><i class="topic-dot"></i>Business models</div>
+            <h3>The $1.50 Hot Dog</h3>
+            <p class="art-desc">Costco sells memberships, not groceries, and what that teaches product managers about where the money really is.</p>
+            <span class="art-read">Read on LinkedIn ↗</span>
+          </div>
         </a>
       </div>
       <div class="btn-row" style="margin-top:28px">
