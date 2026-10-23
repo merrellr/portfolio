@@ -1007,7 +1007,7 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 #art-day-in-the-life .art-thumb { --bg: #f5f3ee; --c1: #2a9d8f; --c2: #d4691f; --k: #9a958b; }
 #art-ai-agents-learn .art-thumb, #art-roadmaps-rituals .art-thumb { --bg: radial-gradient(90% 120% at 85% 15%, #13322b, #16181d 65%); --c1: #3fc7a6; --k: #f5f2ec; }
 #art-pm-copilots .art-thumb { --bg: #f5f2ec; --c1: #0b7a64; --k: #16181d; }
-#art-feature-fallacy .art-thumb { --bg: #f5f2ec; --c1: #d9531e; --k: #16181d; }
+#art-feature-fallacy .art-thumb, #art-product-agents .art-thumb { --bg: linear-gradient(160deg, #eeecfb, #e9eef8 45%, #e2f3ec); --c1: #2a9d8f; --k: #16181d; }
 #art-beyond-automation .art-thumb, #art-150-hot-dog .art-thumb { --bg: #0b7a64; --c1: #f5f2ec; --k: #16181d; }
 #art-150-hot-dog .art-thumb .s { fill: rgba(245, 242, 236, .92); }
 #art-150-hot-dog .art-thumb .f { fill: #16181d; }
