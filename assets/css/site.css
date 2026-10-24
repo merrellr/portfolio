@@ -1050,3 +1050,14 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 /* Article tiles that show the article's cover image from productadvisory.co/insights */
 .art-thumb:has(> img) { height: auto; aspect-ratio: 16 / 9; background: #eceaf7; }
 .art-thumb > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.topic-chips .library-link { margin-left: auto; align-self: center; padding: 6px 2px; font: 600 .875rem var(--sans); color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+.topic-chips .library-link:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .topic-chips .library-link { margin-left: 0; } }
+.finder-more { justify-self: start; font: 600 .9375rem var(--sans); color: var(--accent); text-decoration: none; padding: 4px 2px; }
+.finder-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Cover-image tiles: the hover description covers the whole cover, so none of the cover's own text peeks out */
+@media (hover: hover) {
+  .card.art:has(> .art-thumb > img) .art-body { position: static; }
+  .card.art:has(> .art-thumb > img) .art-desc { top: 0; bottom: auto; min-height: 0; aspect-ratio: 16 / 9; transform: translateY(6px); }
+  .card.art:has(> .art-thumb > img):hover .art-desc, .card.art:has(> .art-thumb > img):focus-visible .art-desc { transform: none; }
+}

@@ -13,6 +13,7 @@
   // The Google Apps Script web app that writes AI answers (apps-script/ask.gs).
   // Leave empty and Ask still works as a plain search over the site.
   var ASK_ENDPOINT = "https://script.google.com/macros/s/AKfycbzBAlOzWixhLKyIbUmMriXhLyhffOskOEdu3dpvYV0k3dMUholkhPdejv7HHaz8yUP2/exec";
+  var LIBRARY = "https://www.productadvisory.co/insights";   // the full article library
   var PAGES = ["index.html", "work.html", "resume.html", "writing.html"];
   var PAGE_NAMES = { "index.html": "Home", "work.html": "Work", "resume.html": "Resume", "writing.html": "Writing" };
 
@@ -160,6 +161,9 @@
       function apply(f, fromClick) {
         if (fromClick) track("filter", { list: bar.getAttribute("data-filter-for").slice(1), filter: f });
         chips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-filter") === f ? "true" : "false"); });
+        // "View full library" opens the Insights page on productadvisory.co filtered to the same topic
+        var lib = $(".library-link", bar), topic = { ai: "agents", enable: "enablement", strategy: "strategy" }[f];
+        if (lib) lib.href = LIBRARY + (topic ? "?topic=" + topic : "");
         items.forEach(function (i) {
           var hit = f === "all" || (" " + i.getAttribute("data-tags") + " ").indexOf(" " + f + " ") > -1;
           if (mode === "dim") i.classList.toggle("dim", !hit); else i.hidden = !hit;
@@ -854,10 +858,15 @@
     function clearPicks() {
       cards.forEach(function (c) { c.classList.remove("picked"); var b = $(".pick-badge", c); if (b) b.remove(); });
     }
+    // Every answer ends with a way to search everything on productadvisory.co (articles, services, toolkits) for the same question.
+    function more(q, none) {
+      return '<a class="finder-more" href="https://www.productadvisory.co/?ask=' + encodeURIComponent(q) + '" target="_blank" rel="noopener">' +
+        (none ? "Search the full Product Advisory library" : "See more on Product Advisory") + ' for “' + esc(q) + '” ↗</a>';
+    }
     function render(q, picks, ai) {
       clearPicks();
       if (!picks.length) {
-        out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div><p class="muted" style="margin:0">Nothing matches that closely. Try different words, or browse the topics below.</p>';
+        out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div><p class="muted" style="margin:0">Nothing on this page matches that closely. Try different words, or browse the topics below.</p>' + more(q, true);
         return;
       }
       out.innerHTML = '<div class="ask-q">“' + esc(q) + '”</div>' + picks.map(function (p, i) {
@@ -866,7 +875,7 @@
         a.el.insertAdjacentHTML("afterbegin", '<span class="pick-badge" aria-hidden="true">' + (i + 1) + "</span>");
         return '<a class="pick" data-cat="' + a.cat + '" href="' + esc(a.url) + '" target="_blank" rel="noopener"><span class="num">' + (i + 1) + "</span><span><b>" + esc(a.title) +
           '</b><small><i class="topic-dot"></i>' + esc(a.topic) + "</small><p>" + esc(p.why || a.desc) + "</p></span></a>";
-      }).join("") + (ai ? '<p class="ask-fine" style="margin:2px 0 0">Suggested by AI from the article summaries. The numbered cards below are highlighted.</p>' : "");
+      }).join("") + (ai ? '<p class="ask-fine" style="margin:2px 0 0">Suggested by AI from the article summaries. The numbered cards below are highlighted.</p>' : "") + more(q, false);
     }
     function rank(q) {
       return buildIndex().then(function (ix) {
