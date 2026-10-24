@@ -1046,3 +1046,7 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .tool-text p { margin: 0 0 10px; color: var(--ink-2); font-size: 0.9688rem; }
 .tool-text .btn { margin-top: auto; align-self: flex-start; }
 @media (prefers-reduced-motion: reduce) { .shot img, .tool-shot img { transition: none; } }
+
+/* Article tiles that show the article's cover image from productadvisory.co/insights */
+.art-thumb:has(> img) { height: auto; aspect-ratio: 16 / 9; background: #eceaf7; }
+.art-thumb > img { display: block; width: 100%; height: 100%; object-fit: cover; }
