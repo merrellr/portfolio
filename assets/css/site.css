@@ -353,8 +353,10 @@ a.cite:hover { border-color: var(--accent); }
 @keyframes flow { to { stroke-dashoffset: -8; } }
 
 /* ---------- resume ---------- */
-.resume-top { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
-@media (max-width: 760px) { .resume-top { grid-template-columns: 1fr; } }
+/* the profile uses the full width; Open PDF, One-pager and Print sit below it */
+.resume-top { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.resume-top p { max-width: 960px; }
+.resume-top .resume-tagline { max-width: none; }
 .contact-line { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.9375rem; color: var(--ink-2); margin-top: 18px; }
 .contact-line a { text-decoration: none; }
 .contact-line a:hover { text-decoration: underline; }
