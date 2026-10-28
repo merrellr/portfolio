@@ -181,6 +181,8 @@
   function openHash() {
     if (!location.hash) return;
     var el = document.getElementById(location.hash.slice(1));
+    // An older anchor kept inside a merged case study (#e-signature) opens that case study too.
+    if (el && el.tagName !== "DETAILS" && el.closest) el = el.closest("details.case");
     if (el && el.tagName === "DETAILS") { el.open = true; el.hidden = false; }
   }
 
