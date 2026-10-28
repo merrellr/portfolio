@@ -81,6 +81,8 @@ If the script can't be reached, the form offers a pre-filled email instead.
   links and PDF opens, which GA records automatically, `site.js` sends these events: `ask_question`, `ask_answer`
   (outcome), `case_study_open` (case_id), `filter` (list, filter), `command_menu_open` and `copy_email`.
   Question text is never sent to GA.
+- **Browser caching:** every stylesheet and script link carries `?v=<hash of the file>`. After editing anything in
+  `assets/css` or `assets/js`, run `python3 tools/version-assets.py` so visitors get the new file at once.
 - **Link previews:** `assets/img/og.png` (1200×630) is the image LinkedIn and others show when the site is shared.
 - **Search engines:** `sitemap.xml` and `robots.txt`. Submit the sitemap in Google Search Console.
 - The footer year is set by `site.js` from the visitor's clock, so it updates on its own every January.
