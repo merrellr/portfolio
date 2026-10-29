@@ -1039,7 +1039,8 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .shot span:not(.sr-only) { display: block; margin-top: 8px; font-size: 0.875rem; color: var(--ink-2); line-height: 1.4; }
 .shot b { display: block; color: var(--ink); font-weight: 600; }
 .shots-note { margin: 12px 0 0; font-size: 0.8125rem; color: var(--muted); }
-.tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 720px) { .tool-grid { grid-template-columns: minmax(0, 1fr); } }
 .tool-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; scroll-margin-top: 88px; }
 .tool-card .tool-shot img { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
 .tool-card .tool-shot:hover img { transform: none; box-shadow: none; }
