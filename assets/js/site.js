@@ -370,6 +370,8 @@
         var html = '<div class="ask-q">“' + esc(q) + '”</div>';
         if (!r.results.length) {
           out.innerHTML = html + '<p class="muted">Nothing on the site answers that directly. <a href="mailto:' + EMAIL + '">Ask Robert by email</a>.</p>';
+          // noted (the question only) on the "Unanswered questions" tab, so the gap can be filled
+          if (ASK_ENDPOINT) fetch(ASK_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ type: "unanswered", q: q }) }).catch(function () {});
           return;
         }
         if (ASK_ENDPOINT) html += '<div class="ask-answer" aria-busy="true"><span class="ask-ai">AI answer</span><p class="ask-thinking">Reading the sections below…</p></div>';
