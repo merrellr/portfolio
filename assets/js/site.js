@@ -827,7 +827,7 @@
       var cur = C.choice();
       bar = document.createElement("div");
       bar.className = "consent"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Cookies and analytics");
-      bar.innerHTML = '<div class="consent-text"><b>Cookies and analytics</b><p>I use Google Analytics to see which pages are used, so I can improve this site. It sets cookies on your device. It isn\'t used for advertising. <a href="https://www.productadvisory.co/privacy-policy#cookies" target="_blank" rel="noopener">Privacy Policy</a></p>' +
+      bar.innerHTML = '<div class="consent-text"><b>Cookies and analytics</b><p>I use Google Analytics and PostHog to see which pages are used, so I can improve this site. They set cookies on your device, and PostHog may record how you use a page, with anything you type hidden. They aren\'t used for advertising. <a href="https://www.productadvisory.co/privacy-policy#cookies" target="_blank" rel="noopener">Privacy Policy</a></p>' +
         (cur ? '<p class="consent-now">Your current choice: ' + (cur === "granted" ? "Accepted" : "Declined") + ".</p>" : "") + "</div>" +
         '<div class="btn-row"><button type="button" class="btn" data-c="granted">Accept</button><button type="button" class="btn ghost" data-c="denied">Decline</button></div>';
       document.body.appendChild(bar);
