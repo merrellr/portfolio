@@ -64,7 +64,7 @@
      - Addresses are cleaned as for Google: only harmless parameters (course, lesson, tool, src...) are kept, and an
        invitation token, a company id or an email in an address never leaves the browser.
      - Errors in the page are recorded, so a broken page shows up before someone has to report it. */
-  var POSTHOG_KEY = '';                              // the project key from PostHog (starts phc_). Public by design. Empty: off.
+  var POSTHOG_KEY = 'phc_AaB4m6YugNZr7NzSWm5S5UshH2HiSudnPztfa5Tkia2k';                              // the project key from PostHog (starts phc_). Public by design. Empty: off.
   var POSTHOG_HOST = 'https://us.i.posthog.com';     // the EU cloud is https://eu.i.posthog.com
   var PH_KEEP = ['course', 'lesson', 'src', 'who', 'call', 'tool'];
   // Text hidden in session replays: names, emails and personal details, wherever they appear.
