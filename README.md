@@ -11,6 +11,7 @@ Plain HTML, CSS and JavaScript, with no build step and no dependencies. To chang
 | Resume | `resume.html` (+ `assets/Robert-Merrell-Resume.pdf`) |
 | Writing & frameworks | `writing.html` |
 | Contact form | `contact.html` (posts to the same Apps Script as Ask) |
+| Contact card (digital business card) | `card.html` + `assets/Robert-Merrell.vcf` (Save to contacts) and `assets/img/card-qr.svg` (QR code that opens `/card`). Every footer links to it. |
 | Make it yours (preferences) | `preferences.html` |
 | One-page summary for printing | `one-pager.html` (fits one US Letter page; QR code in `assets/img/qr.svg`) |
 | Old Google Sites links (`/home`, `/resume`, `/portfolio`, `/blog`) | `404.html` redirects them |

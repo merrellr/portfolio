@@ -1,0 +1,15 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Merrell;Robert;;;
+FN:Robert Merrell
+TITLE:Healthcare Product Executive
+ORG:Product Advisory
+EMAIL;TYPE=INTERNET,WORK,PREF:rmerrell@productadvisory.co
+URL;TYPE=WORK:https://portfolio.productadvisory.co/
+item1.URL:https://www.linkedin.com/in/robertmerrell/
+item1.X-ABLabel:LinkedIn
+item2.URL:https://www.productadvisory.co/
+item2.X-ABLabel:Product Advisory
+ADR;TYPE=WORK:;;;Chicago;IL;;USA
+NOTE:Product\, data and AI strategy for healthcare. Portfolio: portfolio.productadvisory.co
+END:VCARD
