@@ -1071,8 +1071,8 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
 .card-page { padding: clamp(24px, 5vw, 56px) var(--gutter) 64px; }
 .dcard-wrap { display: flex; justify-content: center; padding: 0; }
 .dcard { width: 100%; max-width: 520px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: clamp(24px, 5vw, 40px); }
-.dcard-top { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
-.dcard-mark { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--ink); color: var(--paper); font: 600 .95rem/1 var(--mono); }
+.dcard-top { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+.dcard-photo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--card); box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow); }
 .dcard-top .eyebrow { margin: 0; }
 .dcard h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.1rem, 7vw, 2.7rem); line-height: 1.05; letter-spacing: -.02em; margin: 0; }
 .dcard-title { margin: 10px 0 2px; font-size: 1.12rem; font-weight: 600; color: var(--accent); }
