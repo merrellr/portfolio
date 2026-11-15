@@ -41,6 +41,7 @@
      own. These events cover what it can't see. Question text is never sent. */
   function track(name, params) {
     try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) { /* never break the page */ }
+    if (window.PAEvent) window.PAEvent(name, params);
   }
 
   /* ---------- toast ---------- */

@@ -130,6 +130,20 @@
   // After a no: stop recording on this page; it won't load next time.
   function phDeny(win) { if (win.__paPH) { try { win.posthog.opt_out_capturing(); } catch (e) { /* not loaded */ } } }
 
+  // Site events go to PostHog too (each page's own track() sends them to Google). Only while PostHog is running, so
+  // the visitor's cookie choice applies; only short plain values are sent. The same function is in both consent.js files.
+  window.PAEvent = function (name, params) {
+    try {
+      if (!window.__paPH || !window.posthog || !/^[a-z][a-z0-9_]{0,39}$/.test(String(name))) return;
+      var p = {};
+      Object.keys(params || {}).forEach(function (k) {
+        var v = params[k];
+        if (typeof v === "string") p[k] = v.slice(0, 200); else if (typeof v === "number" || typeof v === "boolean") p[k] = v;
+      });
+      window.posthog.capture(name, p);
+    } catch (e) { /* never break the page */ }
+  };
+
   // PostHog follows the same choice as Google Analytics. Never on a test server, and never inside Learning (an
   // embedded tool is counted there, as part of that visit).
   function phOk() {
