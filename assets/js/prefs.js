@@ -20,14 +20,15 @@
     }
   } catch (e) { /* the page works the same either way */ }
 
-  var DEFAULTS = { style: "editorial", accent: "", text: "m", density: "comfortable", motion: "full", lens: "" };
+  var DEFAULTS = { style: "editorial", accent: "", text: "m", density: "comfortable", motion: "full", lens: "", format: "read" };
   var CHOICES = {
     style: ["editorial", "boardroom", "lab"],
     accent: ["", "green", "blue", "plum", "coral", "gold"],
     text: ["s", "m", "l", "xl"],
     density: ["comfortable", "compact"],
     motion: ["full", "reduced"],
-    lens: ["", "recruiter", "hiring", "product"]
+    lens: ["", "recruiter", "hiring", "product"],
+    format: ["read", "listen", "watch"]   // how they like Product+ articles; productadvisory.co reads it from the shared cookie
   };
   var MODES = ["light", "dark"];
   // Extra fonts only for the styles that need them.
@@ -78,7 +79,7 @@
     else set("localStorage", LOOK, null);
   }
   // The portfolio's styles differ from productadvisory.co's, so style stays its own.
-  var SHARED = ["accent", "text", "density", "motion"];
+  var SHARED = ["accent", "text", "density", "motion", "format"];
 
   /** The visitor's own saved choices. */
   function read() {
