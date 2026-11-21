@@ -923,8 +923,8 @@
      Previous / Next, the arrow keys, or a swipe on a phone. Esc, the × or a click outside closes it, and focus goes
      back to the screenshot. Ctrl/⌘-click (or middle-click) still opens the image in a new tab. */
   function initShots() {
-    var shots = $$(".shot-grid .shot");
-    if (!shots.length) return;
+    var shots = $$(".shot-grid .shot"), starts = $$("[data-shots]");   // data-shots="#group": a picture that opens a group
+    if (!shots.length && !starts.length) return;
     var box, img, cap, count, prev, next, list = [], at = 0, opener = null, sx = null;
     function build() {
       box = document.createElement("div");
@@ -974,16 +974,16 @@
       // load the neighbours so the next click is instant
       [at + 1, at - 1].forEach(function (k) { var n = list[(k + list.length) % list.length]; if (n) (new Image()).src = n.getAttribute("href"); });
     }
-    function open(a) {
+    function open(a, from) {
       if (!box) build();
-      opener = a;
+      opener = from || a;
       list = $$(".shot", a.closest(".shot-grid"));
       box.classList.add("open");
       document.documentElement.classList.add("lb-on");
       go(list.indexOf(a));
       (list.length > 1 ? next : $(".lb-x", box)).focus();
-      var c = a.closest(".case");
-      track("screenshot_open", { case_id: c ? c.id : "" });
+      var c = a.closest(".case, [data-case]");
+      track("screenshot_open", { case_id: c ? (c.id || c.getAttribute("data-case")) : "" });
     }
     function close() {
       box.classList.remove("open");
@@ -996,6 +996,14 @@
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // a new tab, as before
         e.preventDefault();
         open(a);
+      });
+    });
+    starts.forEach(function (st) {
+      st.addEventListener("click", function (e) {
+        var g = $(st.getAttribute("data-shots")), first = g && $(".shot", g);
+        if (!first || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        open(first, st);
       });
     });
   }

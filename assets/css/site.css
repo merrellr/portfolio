@@ -1136,3 +1136,11 @@ html.lb-on { overflow: hidden; }
   .lb-fig img { max-height: calc(100% - 140px); }
   .lb-cap { padding: 0 64px; font-size: .875rem; }
 }
+
+/* a feature card's picture that opens its screenshots (Home) */
+.feature-shot { position: relative; display: block; width: 100%; border-radius: 10px; }
+.feature-shot img { transition: transform .2s, box-shadow .2s; }
+.feature-shot:hover img { transform: translateY(-2px); }
+.feature-shot-tag { position: absolute; right: 12px; bottom: 12px; padding: 5px 11px; border-radius: 999px; background: rgb(18 20 26 / .82); color: #fff; font: 500 .75rem var(--sans); letter-spacing: .01em; pointer-events: none; }
+.feature-shot-tag::before { content: "▸ "; }
+.feature-shot:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
