@@ -918,6 +918,88 @@
     input.addEventListener("focus", function () { buildIndex(); }, { once: true });
   }
 
+  /* ---------- screenshot viewer ----------
+     Click a case study's screenshot to see it large, then step through the rest of that case's screenshots:
+     Previous / Next, the arrow keys, or a swipe on a phone. Esc, the × or a click outside closes it, and focus goes
+     back to the screenshot. Ctrl/⌘-click (or middle-click) still opens the image in a new tab. */
+  function initShots() {
+    var shots = $$(".shot-grid .shot");
+    if (!shots.length) return;
+    var box, img, cap, count, prev, next, list = [], at = 0, opener = null, sx = null;
+    function build() {
+      box = document.createElement("div");
+      box.className = "lb";
+      box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Screenshots");
+      box.innerHTML = '<div class="lb-top"><span class="lb-count" aria-live="polite"></span><button type="button" class="lb-x" aria-label="Close">&times;</button></div>' +
+        '<div class="lb-stage"><button type="button" class="lb-nav lb-prev" aria-label="Previous screenshot">&#8249;</button>' +
+        '<figure class="lb-fig"><img alt=""><figcaption class="lb-cap"></figcaption></figure>' +
+        '<button type="button" class="lb-nav lb-next" aria-label="Next screenshot">&#8250;</button></div>';
+      document.body.appendChild(box);
+      img = $("img", box); cap = $(".lb-cap", box); count = $(".lb-count", box);
+      prev = $(".lb-prev", box); next = $(".lb-next", box);
+      prev.addEventListener("click", function () { go(at - 1); });
+      next.addEventListener("click", function () { go(at + 1); });
+      $(".lb-x", box).addEventListener("click", close);
+      box.addEventListener("click", function (e) { if (e.target === box || e.target.classList.contains("lb-stage")) close(); });
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { e.preventDefault(); close(); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); go(at + 1); }
+        else if (e.key === "ArrowLeft") { e.preventDefault(); go(at - 1); }
+        else if (e.key === "Tab") {   // keep focus in the viewer
+          var f = $$("button", box).filter(function (b) { return !b.hidden; }), i = f.indexOf(document.activeElement);
+          e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+        }
+      });
+      // swipe left or right on a phone
+      box.addEventListener("touchstart", function (e) { sx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+      box.addEventListener("touchend", function (e) {
+        if (sx === null) return;
+        var dx = e.changedTouches[0].clientX - sx; sx = null;
+        if (Math.abs(dx) > 50) go(at + (dx < 0 ? 1 : -1));
+      });
+    }
+    function label(a) {
+      var alt = ($("img", a) || {}).alt || "";
+      return alt.replace(/^Screenshot of\s+/i, "").replace(/^Datum\.\s*/, "");
+    }
+    function go(i) {
+      if (!list.length) return;
+      at = (i + list.length) % list.length;
+      var a = list[at];
+      img.src = a.getAttribute("href");
+      img.alt = ($("img", a) || {}).alt || "";
+      cap.textContent = label(a);
+      count.textContent = list.length > 1 ? (at + 1) + " of " + list.length : "";
+      prev.hidden = next.hidden = list.length < 2;
+      // load the neighbours so the next click is instant
+      [at + 1, at - 1].forEach(function (k) { var n = list[(k + list.length) % list.length]; if (n) (new Image()).src = n.getAttribute("href"); });
+    }
+    function open(a) {
+      if (!box) build();
+      opener = a;
+      list = $$(".shot", a.closest(".shot-grid"));
+      box.classList.add("open");
+      document.documentElement.classList.add("lb-on");
+      go(list.indexOf(a));
+      (list.length > 1 ? next : $(".lb-x", box)).focus();
+      var c = a.closest(".case");
+      track("screenshot_open", { case_id: c ? c.id : "" });
+    }
+    function close() {
+      box.classList.remove("open");
+      document.documentElement.classList.remove("lb-on");
+      img.removeAttribute("src");
+      if (opener) opener.focus();
+    }
+    shots.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // a new tab, as before
+        e.preventDefault();
+        open(a);
+      });
+    });
+  }
+
   /* ---------- go ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
@@ -931,6 +1013,7 @@
     initSharedBar();
     initFinder();
     initConsent();
+    initShots();
     $$("details.case").forEach(function (d) {
       d.addEventListener("toggle", function () { if (d.open) track("case_study_open", { case_id: d.id }); });
     });

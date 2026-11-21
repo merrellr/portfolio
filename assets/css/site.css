@@ -1113,3 +1113,26 @@ code { font: .875em var(--mono); background: var(--paper-2); padding: 1px 5px; b
   .nav, footer.site, .dcard-copy, .dcard-actions, .dcard-cta, .dcard-status { display: none !important; }
   .dcard { box-shadow: none; border: 0; }
 }
+
+/* screenshot viewer (site.js initShots): one case's screenshots, large, with Previous / Next */
+.lb { position: fixed; inset: 0; z-index: 300; display: none; flex-direction: column; background: rgb(12 14 18 / .97); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #f4f1ea; }
+.lb.open { display: flex; }
+html.lb-on { overflow: hidden; }
+.lb-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.lb-count { font: 500 .8125rem var(--mono); letter-spacing: .06em; color: rgb(244 241 234 / .75); }
+.lb-x { width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 1.75rem; line-height: 1; cursor: pointer; }
+.lb-stage { flex: 1; min-height: 0; display: flex; align-items: center; gap: 12px; padding: 0 16px 20px; }
+.lb-fig { flex: 1; min-width: 0; height: 100%; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.lb-fig img { max-width: 100%; max-height: calc(100% - 64px); object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgb(0 0 0 / .45); }
+.lb-cap { max-width: 900px; text-align: center; font-size: .9375rem; line-height: 1.45; color: rgb(244 241 234 / .9); }
+.lb-nav { flex: none; width: 52px; height: 52px; border: 1px solid rgb(244 241 234 / .3); border-radius: 50%; background: rgb(255 255 255 / .08); color: inherit; font-size: 2rem; line-height: 1; cursor: pointer; transition: background .15s; }
+.lb-nav:hover, .lb-x:hover { background: rgb(255 255 255 / .16); }
+.lb-nav[hidden] { display: none; }
+.lb button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .lb-stage { position: relative; padding: 0 8px 16px; }
+  .lb-nav { position: absolute; bottom: 24px; width: 46px; height: 46px; background: rgb(20 22 28 / .8); }
+  .lb-prev { left: 16px; } .lb-next { right: 16px; }
+  .lb-fig img { max-height: calc(100% - 140px); }
+  .lb-cap { padding: 0 64px; font-size: .875rem; }
+}
